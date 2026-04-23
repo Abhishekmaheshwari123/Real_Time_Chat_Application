@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "ZV6pfi6EWCosfuORkmf2rop5y08Mq/p50MM/007utB0=",
+  "Source": "ConnectHub.Auth.API",
+  "BasePath": "_content/ConnectHub.Auth.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
