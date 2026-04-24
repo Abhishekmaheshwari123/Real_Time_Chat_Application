@@ -1,0 +1,12 @@
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Domain\bin\Debug\net8.0\ConnectHub.Chat.Domain.deps.json
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Domain\bin\Debug\net8.0\ConnectHub.Chat.Domain.dll
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Domain\bin\Debug\net8.0\ConnectHub.Chat.Domain.pdb
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Domain\obj\Debug\net8.0\ConnectHub.Chat.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Domain\obj\Debug\net8.0\ConnectHub.Chat.Domain.AssemblyInfoInputs.cache
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Domain\obj\Debug\net8.0\ConnectHub.Chat.Domain.AssemblyInfo.cs
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Domain\obj\Debug\net8.0\ConnectHub.Chat.Domain.csproj.CoreCompileInputs.cache
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Domain\obj\Debug\net8.0\ConnectHub.Chat.Domain.sourcelink.json
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Domain\obj\Debug\net8.0\ConnectHub.Chat.Domain.dll
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Domain\obj\Debug\net8.0\refint\ConnectHub.Chat.Domain.dll
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Domain\obj\Debug\net8.0\ConnectHub.Chat.Domain.pdb
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Domain\obj\Debug\net8.0\ref\ConnectHub.Chat.Domain.dll

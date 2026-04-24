@@ -1,0 +1,128 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Application\\ConnectHub.Chat.Application.csproj": {}
+  },
+  "projects": {
+    "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Application\\ConnectHub.Chat.Application.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Application\\ConnectHub.Chat.Application.csproj",
+        "projectName": "ConnectHub.Chat.Application",
+        "projectPath": "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Application\\ConnectHub.Chat.Application.csproj",
+        "packagesPath": "C:\\Users\\mahes\\.nuget\\packages\\",
+        "outputPath": "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Application\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\mahes\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Domain\\ConnectHub.Chat.Domain.csproj": {
+                "projectPath": "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Domain\\ConnectHub.Chat.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Domain\\ConnectHub.Chat.Domain.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Domain\\ConnectHub.Chat.Domain.csproj",
+        "projectName": "ConnectHub.Chat.Domain",
+        "projectPath": "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Domain\\ConnectHub.Chat.Domain.csproj",
+        "packagesPath": "C:\\Users\\mahes\\.nuget\\packages\\",
+        "outputPath": "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Domain\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\mahes\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
