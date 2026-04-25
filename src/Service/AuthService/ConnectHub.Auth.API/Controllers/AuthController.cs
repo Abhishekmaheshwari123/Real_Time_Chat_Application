@@ -48,7 +48,7 @@ public class AuthController : ControllerBase
 
         // 2. Secret key (same as Program.cs)
         var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes("THIS_IS_MY_SUPER_SECRET_KEY_12345")
+            Encoding.UTF8.GetBytes("THIS_IS_SUPER_SECRET_KEY_123456789")
         );
 
         // 3. Signing credentials (algorithm)

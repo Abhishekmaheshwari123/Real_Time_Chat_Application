@@ -3,69 +3,65 @@ using ConnectHub.Chat.Infrastructure;
 using ConnectHub.Chat.Domain;
 using ConnectHub.Chat.Application.DTOs;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using ConnectHub.Chat.Application.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace ConnectHub.Chat.API.Controllers;
 
 [ApiController]
 [Route("api/chat")]
+[Authorize]
 public class ChatController : ControllerBase
 {
-    private readonly ChatDbContext _context;
+private readonly ChatDbContext _context;
 
-    public ChatController(ChatDbContext context)
+public ChatController(ChatDbContext context)
+{
+    _context = context;
+}
+
+// ✅ SEND MESSAGE (REST)
+[HttpPost("send")]
+public async Task<IActionResult> SendMessage([FromBody] SendMessageDto dto)
+{
+    var sender = User.FindFirst(ClaimTypes.Email)?.Value;
+
+    if (string.IsNullOrEmpty(sender))
+        return Unauthorized();
+
+    var message = new Message
     {
-        _context = context;
-    }
+        Sender = sender,
+        Receiver = dto.Receiver,
+        Content = dto.Content,
+        SentAt = DateTime.UtcNow,
+        Status = "Sent"
+    };
 
-    // ==============================
-    // ✅ 1. SEND MESSAGE (REST API)
-    // ==============================
-    [HttpPost("send")]
-    [Authorize]
-    public async Task<IActionResult> SendMessage([FromBody] SendMessageDto dto)
-    {
-        //GET USER FROM TOKEN
-        var sender = User.Identity?.Name;
+    _context.Messages.Add(message);
+    await _context.SaveChangesAsync();
 
-        var message = new Message
-        {
-            Sender = sender,
-            Receiver = dto.Receiver,
-            Content = dto.Content,
-            SentAt = DateTime.UtcNow,
-            Status = "Sent"
-        };
+    return Ok(new { success = true });
+}
 
-        _context.Messages.Add(message);
-        await _context.SaveChangesAsync();
+// ✅ CHAT HISTORY (ONLY ONE API)
+[HttpGet("history/{user}")]
+public async Task<IActionResult> GetChatHistory(string user)
+{
+    var currentUser = User.FindFirst(ClaimTypes.Email)?.Value;
 
-        return Ok(new { success = true });
-    }
+    if (string.IsNullOrEmpty(currentUser))
+        return Unauthorized();
 
-    // ======================================
-    //2. GET CHAT HISTORY BETWEEN USERS
-    // ======================================
-    [HttpGet("history")]
-    public async Task<IActionResult> GetChatHistory(string user1, string user2)
-    {
-        var messages = await _context.Messages
-            .Where(m =>
-                (m.Sender == user1 && m.Receiver == user2) ||
-                (m.Sender == user2 && m.Receiver == user1)
-            )
-            .OrderBy(m => m.SentAt)
-            .Select(m => new MessageDto
-            {
-                Sender = m.Sender,
-                Receiver = m.Receiver,
-                Content = m.Content,
-                Timestamp = m.SentAt
-            })
-            .ToListAsync();
+    var messages = await _context.Messages
+        .Where(m =>
+            (m.Sender == currentUser && m.Receiver == user) ||
+            (m.Sender == user && m.Receiver == currentUser)
+        )
+        .OrderBy(m => m.SentAt)
+        .ToListAsync();
 
-        return Ok(messages);
-    }
+    return Ok(messages);
+}
+
 }

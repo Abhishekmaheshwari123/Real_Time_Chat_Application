@@ -9,6 +9,7 @@ C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\bin\Debug\net8.0
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\bin\Debug\net8.0\Azure.Identity.dll
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\bin\Debug\net8.0\BCrypt.Net-Next.dll
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\bin\Debug\net8.0\Humanizer.dll
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\bin\Debug\net8.0\Microsoft.AspNetCore.OpenApi.dll
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\bin\Debug\net8.0\Microsoft.CodeAnalysis.dll
@@ -134,6 +135,7 @@ C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\obj\Debug\net8.0
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\obj\Debug\net8.0\ConnectHub.Auth.API.csproj.CoreCompileInputs.cache
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\obj\Debug\net8.0\ConnectHub.Auth.API.MvcApplicationPartsAssemblyInfo.cs
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\obj\Debug\net8.0\ConnectHub.Auth.API.MvcApplicationPartsAssemblyInfo.cache
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\obj\Debug\net8.0\ConnectHub.Auth.API.sourcelink.json
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\obj\Debug\net8.0\staticwebassets.build.json
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\obj\Debug\net8.0\staticwebassets.development.json
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\obj\Debug\net8.0\staticwebassets\msbuild.ConnectHub.Auth.API.Microsoft.AspNetCore.StaticWebAssets.props
@@ -148,4 +150,3 @@ C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\obj\Debug\net8.0
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\obj\Debug\net8.0\ConnectHub.Auth.API.pdb
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\obj\Debug\net8.0\ConnectHub.Auth.API.genruntimeconfig.cache
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\obj\Debug\net8.0\ref\ConnectHub.Auth.API.dll
-C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

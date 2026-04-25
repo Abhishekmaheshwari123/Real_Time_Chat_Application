@@ -5,6 +5,7 @@ C:\chat application\src\Service\AuthService\ConnectHub.Auth.Domain\obj\Debug\net
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.Domain\obj\Debug\net8.0\ConnectHub.Auth.Domain.AssemblyInfoInputs.cache
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.Domain\obj\Debug\net8.0\ConnectHub.Auth.Domain.AssemblyInfo.cs
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.Domain\obj\Debug\net8.0\ConnectHub.Auth.Domain.csproj.CoreCompileInputs.cache
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Domain\obj\Debug\net8.0\ConnectHub.Auth.Domain.sourcelink.json
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.Domain\obj\Debug\net8.0\ConnectHub.Auth.Domain.dll
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.Domain\obj\Debug\net8.0\refint\ConnectHub.Auth.Domain.dll
 C:\chat application\src\Service\AuthService\ConnectHub.Auth.Domain\obj\Debug\net8.0\ConnectHub.Auth.Domain.pdb

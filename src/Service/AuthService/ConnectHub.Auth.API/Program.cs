@@ -3,27 +3,49 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-#region SERVICES
+// ==========================
+// JWT SETTINGS
+// ==========================
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var jwtIssuer = jwtSettings["Issuer"] ?? "ConnectHub";
+var jwtAudience = jwtSettings["Audience"] ?? "ConnectHubUsers";
+var jwtKey = jwtSettings["Key"] ?? "THIS_IS_SUPER_SECRET_KEY_123456789";
 
-// ✅ Controllers
+// ==========================
+// CORS ORIGINS
+// ==========================
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>()
+    ?? new[]
+    {
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://localhost:3000"
+    };
+
+// ==========================
+// SERVICES
+// ==========================
 builder.Services.AddControllers();
 
-// ✅ DbContext
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(
-        "Server=.;Database=AuthDB;Trusted_Connection=True;TrustServerCertificate=True"
+        builder.Configuration.GetConnectionString("AuthDbConnection")
     )
 );
 
-// 🔐 JWT AUTHENTICATION
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
+// ==========================
+// JWT AUTH
+// ==========================
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -33,40 +55,63 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
 
-        ValidIssuer = "ConnectHub",
-        ValidAudience = "ConnectHubUsers",
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
 
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes("THIS_IS_MY_SUPER_SECRET_KEY_12345")
+            Encoding.UTF8.GetBytes(jwtKey)
         )
     };
 });
 
-// Authorization
 builder.Services.AddAuthorization();
 
-// Swagger
+// ==========================
+// CORS
+// ==========================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+
+// ==========================
+// SWAGGER
+// ==========================
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "ConnectHub Auth API",
+        Version = "v1"
+    });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Scheme = "Bearer",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
         BearerFormat = "JWT",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        In = ParameterLocation.Header,
         Description = "Enter: Bearer {your JWT token}"
     });
 
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            new OpenApiSecurityScheme
             {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                Reference = new OpenApiReference
                 {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
                 }
             },
@@ -75,27 +120,34 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-#endregion
-
 var app = builder.Build();
 
-#region MIDDLEWARE PIPELINE
+// ==========================
+// MIDDLEWARE PIPELINE
+// ==========================
 
-// Swagger (only dev)
-if (app.Environment.IsDevelopment())
+// ✅ Swagger ALWAYS enabled (for dev/testing)
+
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Auth API V1");
+});
 
-// 🔐 IMPORTANT ORDER
-app.UseHttpsRedirection();
+// Optional HTTPS redirect
+// app.UseHttpsRedirection();
 
-app.UseAuthentication();   // 👈 FIRST check who user is
-app.UseAuthorization();    // 👈 THEN check what user can access
+app.UseRouting();
 
-app.MapControllers();      // 👈 Activate API routes
+// ✅ CORS BEFORE auth
+app.UseCors("AllowFrontend");
 
-#endregion
+// ✅ Auth
+app.UseAuthentication();
+app.UseAuthorization();
+
+// ✅ Map controllers
+app.MapControllers();
 
 app.Run();
+

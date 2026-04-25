@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ConnectHub.Chat.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+34f0b80d53373f6d06ba032872584cbae966aa9c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0f2220401e3047544db56d75930a0341ea1a8247")]
 [assembly: System.Reflection.AssemblyProductAttribute("ConnectHub.Chat.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ConnectHub.Chat.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
