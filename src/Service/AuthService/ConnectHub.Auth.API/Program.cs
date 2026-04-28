@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var jwtIssuer = jwtSettings["Issuer"] ?? "ConnectHub";
 var jwtAudience = jwtSettings["Audience"] ?? "ConnectHubUsers";
-var jwtKey = jwtSettings["Key"] ?? "THIS_IS_SUPER_SECRET_KEY_123456789";
+var jwtKey = jwtSettings["Key"] ?? "THIS_IS_SUPER_SECRET_KEY_123456789_ABCDEF_1234567890";
 
 // ==========================
 // CORS ORIGINS

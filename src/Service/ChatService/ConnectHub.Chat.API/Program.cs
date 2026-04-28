@@ -1,166 +1,81 @@
-using ConnectHub.Chat.Infrastructure;
-using Microsoft.EntityFrameworkCore;
-using ConnectHub.Chat.API.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.OpenApi.Models;
+using System.Security.Claims;
+using ConnectHub.Chat.Infrastructure; // Replace with your actual namespace
+using Microsoft.EntityFrameworkCore;
+using ConnectHub.Chat.API.Hubs; // Replace with your actual namespace
 
 var builder = WebApplication.CreateBuilder(args);
 
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-var jwtIssuer = jwtSettings["Issuer"] ?? "ConnectHub";
-var jwtAudience = jwtSettings["Audience"] ?? "ConnectHubUsers";
-var jwtKey = jwtSettings["Key"] ?? "THIS_IS_SUPER_SECRET_KEY_123456789";
-var allowedOrigins = builder.Configuration
-    .GetSection("Cors:AllowedOrigins")
-    .Get<string[]>()
-    ?? new[]
-    {
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
-        "http://127.0.0.1:5501",
-        "http://localhost:5501",
-        "http://127.0.0.1:5173",
-        "http://localhost:5173",
-        "http://127.0.0.1:3000",
-        "http://localhost:3000"
-    };
+// 1. REGISTER THE USER ID PROVIDER (Defined at the bottom of this file)
+builder.Services.AddSingleton<IUserIdProvider, EmailBasedUserIdProvider>();
 
-// ==========================
-// CONTROLLERS + SIGNALR
-// ==========================
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 
-// ==========================
-// DATABASE
-// ==========================
+// 2. CONFIGURE DATABASE (Ensure this matches your connection string)
 builder.Services.AddDbContext<ChatDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("ChatDbConnection")
-    )
-);
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ==========================
-// JWT AUTH
-// ==========================
+// 3. CONFIGURE AUTHENTICATION & SIGNALR JWT HANDLING
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+    .AddJwtBearer(options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-
-        ValidIssuer = jwtIssuer,
-        ValidAudience = jwtAudience,
-
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(jwtKey)
-        )
-    };
-
-    // SignalR token support
-    options.Events = new JwtBearerEvents
-    {
-        OnMessageReceived = context =>
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            var accessToken = context.Request.Query["access_token"];
-            var path = context.HttpContext.Request.Path;
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
 
-            if (!string.IsNullOrEmpty(accessToken) &&
-                path.StartsWithSegments("/chatHub"))
-            {
-                context.Token = accessToken;
-            }
-
-            return Task.CompletedTask;
-        }
-    };
-});
-
-builder.Services.AddAuthorization();
-
-// ==========================
-// CORS
-// ==========================
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy.WithOrigins(allowedOrigins) 
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
-});
-
-// ==========================
-// SWAGGER
-// ==========================
-builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "ConnectHub Chat API",
-        Version = "v1"
-    });
-
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header
-    });
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
+        // This part is crucial for SignalR to read the token from the URL query string
+        options.Events = new JwtBearerEvents
         {
-            new OpenApiSecurityScheme
+            OnMessageReceived = context =>
             {
-                Reference = new OpenApiReference
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
                 {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
+                    context.Token = accessToken;
                 }
-            },
-            new string[] {}
-        }
+                return Task.CompletedTask;
+            }
+        };
     });
-});
 
 var app = builder.Build();
 
-// ==========================
-// PIPELINE ORDER (CRITICAL)
-// ==========================
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
-
-app.UseRouting();
-
-app.UseCors("AllowFrontend"); 
+// 4. CONFIGURE MIDDLEWARE
+app.UseCors(policy => policy
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .SetIsOriginAllowed(_ => true) // Allows local development requests
+    .AllowCredentials());
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers().RequireCors("AllowFrontend");
-
+app.MapControllers();
 app.MapHub<ChatHub>("/chatHub");
 
 app.Run();
+
+/* ==========================================================================
+   SUPPORTING CLASSES (Merged into Program.cs)
+   ========================================================================== */
+
+public class EmailBasedUserIdProvider : IUserIdProvider
+{
+    public string GetUserId(HubConnectionContext connection)
+    {
+        // This ensures Clients.User("email@test.com") works correctly
+        return connection.User?.FindFirst(ClaimTypes.Email)?.Value;
+    }
+}

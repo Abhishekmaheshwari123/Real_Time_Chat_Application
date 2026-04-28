@@ -2067,7 +2067,10 @@
         },
         "runtime": {
           "bin/placeholder/ConnectHub.Chat.Application.dll": {}
-        }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
       },
       "ConnectHub.Chat.Domain/1.0.0": {
         "type": "project",

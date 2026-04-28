@@ -1,3 +1,5 @@
+namespace ConnectHub.Chat.Domain;
+
 public class Message
 {
     public int Id { get; set; }
@@ -9,5 +11,7 @@ public class Message
 
     public DateTime SentAt { get; set; }
 
-    public string Status { get; set; } = "Sent"; // ✅ NEW
+    public string Status { get; set; } = "Sent";
+
+    public bool IsRead { get; set; } = false;
 }

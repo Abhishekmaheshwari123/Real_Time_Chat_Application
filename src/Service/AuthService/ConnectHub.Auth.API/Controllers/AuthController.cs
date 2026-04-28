@@ -15,12 +15,20 @@ namespace ConnectHub.Auth.API.Controllers;
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
+    private readonly AuthDbContext _context;
+    private readonly IConfiguration _config;
+
+    public AuthController(AuthDbContext context, IConfiguration config)
+    {
+        _context = context;
+        _config = config;
+    }
 
     [Authorize]
     [HttpGet("profile")]
     public async Task<IActionResult> GetProfile()
     {
-        var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        var email = User.FindFirst(ClaimTypes.Email)?.Value;
 
         var user = await _context.Users
             .FirstOrDefaultAsync(x => x.Email == email);
@@ -35,10 +43,12 @@ public class AuthController : ControllerBase
         });
     }
 
-
     private string CreateToken(User user)
     {
-        // 1. Claims = user identity data inside token
+        var jwtKey = _config["Jwt:Key"];
+        var issuer = _config["Jwt:Issuer"];
+        var audience = _config["Jwt:Audience"];
+
         var claims = new[]
         {
             new Claim(ClaimTypes.Name, user.UserName),
@@ -46,46 +56,25 @@ public class AuthController : ControllerBase
             new Claim("UserId", user.Id.ToString())
         };
 
-        // 2. Secret key (same as Program.cs)
         var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes("THIS_IS_SUPER_SECRET_KEY_123456789")
+            Encoding.UTF8.GetBytes(jwtKey)
         );
 
-        // 3. Signing credentials (algorithm)
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        // 4. Token structure
         var token = new JwtSecurityToken(
-            issuer: "ConnectHub",
-            audience: "ConnectHubUsers",
+            issuer: issuer,
+            audience: audience,
             claims: claims,
-            expires: DateTime.Now.AddHours(2),
+            expires: DateTime.UtcNow.AddHours(2),
             signingCredentials: creds
         );
 
-        // 5. Convert token to string
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-
-
-
-    private readonly AuthDbContext _context;
-
-    // ✅ Constructor Injection (BEST PRACTICE)
-    public AuthController(AuthDbContext context)
-    {
-        _context = context;
-    }
-
-    [HttpGet]
-    public IActionResult Test()
-    {
-        return Ok(new { message = "Auth API is running" });
-    }
-
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterRequest request)   // register
+    public async Task<IActionResult> Register(RegisterRequest request)
     {
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
@@ -99,43 +88,28 @@ public class AuthController : ControllerBase
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        // ✅ THIS LINE TELLS US IF DATA IS REALLY SAVED
-        var totalUsers = await _context.Users.CountAsync();
-
-        return Ok(new 
-        { 
-            message = "User registered successfully",
-            totalUsers = totalUsers
-        });
+        return Ok(new { message = "User registered successfully" });
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        // 1. Find user
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Email == request.Email);
 
         if (user == null)
-            return BadRequest(new { message = "User not found" });
+            return BadRequest("User not found");
 
-        // 2. Verify password
-        bool isValid = BCrypt.Net.BCrypt.Verify(
-            request.Password,
-            user.PasswordHash
-        );
+        bool isValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
 
         if (!isValid)
-            return BadRequest(new { message = "Invalid password" });
+            return BadRequest("Invalid password");
 
-        // 3. Generate JWT token
         var token = CreateToken(user);
 
-        // 4. Return response
         return Ok(new
         {
-            message = "Login successful",
-            token = token,
+            token,
             user = new
             {
                 user.UserName,
