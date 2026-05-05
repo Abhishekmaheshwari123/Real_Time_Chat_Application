@@ -57,11 +57,19 @@ public class ChatHub : Hub
             // small delay to allow UI to render ✓ first
             await Task.Delay(200);
 
-            chat.Status = "Delivered";
-            await _context.SaveChangesAsync();
-
             // notify sender → update to ✓✓
-            await Clients.Caller.SendAsync("MessageDelivered", new { id = chat.Id });
+            // 🔥 ONLY update to Delivered if it hasn't been seen yet!
+            var currentStatus = await _context.Messages
+                .Where(m => m.Id == chat.Id)
+                .Select(m => m.Status)
+                .FirstOrDefaultAsync();
+
+            if (currentStatus != "Seen")
+            {
+                chat.Status = "Delivered";
+                await _context.SaveChangesAsync();
+                await Clients.Caller.SendAsync("MessageDelivered", new { id = chat.Id });
+            }
         }
         catch
         {
