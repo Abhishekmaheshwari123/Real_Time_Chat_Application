@@ -8,6 +8,7 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Google.Apis.Auth;
 
 namespace ConnectHub.Auth.API.Controllers;
 
@@ -22,6 +23,60 @@ public class AuthController : ControllerBase
     {
         _context = context;
         _config = config;
+    }
+
+    [HttpPost("google")]
+    public async Task<IActionResult> GoogleLogin([FromBody] GoogleAuthRequest request)
+    {
+        try
+        {
+            var clientId = _config["Google:ClientId"]?.Trim();
+            if (string.IsNullOrEmpty(clientId))
+            {
+                Console.WriteLine("DEBUG: Google Client ID is MISSING in config!");
+                return StatusCode(500, "Google Client ID not configured in backend");
+            }
+
+            Console.WriteLine($"DEBUG: Backend is using Google Client ID: {clientId}");
+
+            var settings = new GoogleJsonWebSignature.ValidationSettings()
+            {
+                Audience = new List<string>() { clientId }
+            };
+
+            var payload = await GoogleJsonWebSignature.ValidateAsync(request.Credential, settings);
+
+            var email = payload.Email;
+            var name = payload.Name;
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                user = new User
+                {
+                    UserName = name ?? email.Split('@')[0],
+                    Email = email,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString())
+                };
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+
+            var token = CreateToken(user);
+
+            return Ok(new
+            {
+                token,
+                user = new { user.UserName, user.Email }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"GOOGLE LOGIN ERROR: {ex.Message}");
+            if (ex.InnerException != null) Console.WriteLine($"INNER ERROR: {ex.InnerException.Message}");
+            
+            return BadRequest(new { message = "Invalid Google token", error = ex.Message });
+        }
     }
 
     [Authorize]
@@ -45,7 +100,7 @@ public class AuthController : ControllerBase
 
     private string CreateToken(User user)
     {
-        var jwtKey = _config["Jwt:Key"];
+        var jwtKey = _config["Jwt:Key"] ?? "THIS_IS_SUPER_SECRET_KEY_123456789_ABCDEF_1234567890";
         var issuer = _config["Jwt:Issuer"];
         var audience = _config["Jwt:Audience"];
 
@@ -53,6 +108,7 @@ public class AuthController : ControllerBase
         {
             new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.NameIdentifier, user.Email),
             new Claim("UserId", user.Id.ToString())
         };
 
