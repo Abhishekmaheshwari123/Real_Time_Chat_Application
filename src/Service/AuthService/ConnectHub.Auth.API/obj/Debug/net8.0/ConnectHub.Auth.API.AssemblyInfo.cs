@@ -13,7 +13,11 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ConnectHub.Auth.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
+<<<<<<< Updated upstream
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+75190eee9ca5a6cd419aebbd98680061e46deb8b")]
+=======
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0f2220401e3047544db56d75930a0341ea1a8247")]
+>>>>>>> Stashed changes
 [assembly: System.Reflection.AssemblyProductAttribute("ConnectHub.Auth.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ConnectHub.Auth.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
