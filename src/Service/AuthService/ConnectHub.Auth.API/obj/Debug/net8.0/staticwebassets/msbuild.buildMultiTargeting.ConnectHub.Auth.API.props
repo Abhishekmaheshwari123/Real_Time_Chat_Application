@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\ConnectHub.Auth.API.props" />
-</Project>

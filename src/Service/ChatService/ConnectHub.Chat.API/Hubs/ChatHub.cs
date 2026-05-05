@@ -57,11 +57,15 @@ public class ChatHub : Hub
             // small delay to allow UI to render ✓ first
             await Task.Delay(200);
 
-            chat.Status = "Delivered";
-            await _context.SaveChangesAsync();
-
-            // notify sender → update to ✓✓
-            await Clients.Caller.SendAsync("MessageDelivered", new { id = chat.Id });
+            // Re-fetch message to check current status
+            var currentMsg = await _context.Messages.FindAsync(chat.Id);
+            if (currentMsg != null && currentMsg.Status == "Sent")
+            {
+                currentMsg.Status = "Delivered";
+                await _context.SaveChangesAsync();
+                // notify sender → update to ✓✓
+                await Clients.Caller.SendAsync("MessageDelivered", new { id = chat.Id });
+            }
         }
         catch
         {
@@ -75,12 +79,15 @@ public class ChatHub : Hub
     public async Task MarkAsSeen(string otherUser)
     {
         var currentUser = Context.User?.FindFirst(ClaimTypes.Email)?.Value;
+        Console.WriteLine($"MarkAsSeen triggered by {currentUser} for messages from {otherUser}");
         
         // Find all unread messages from that specific user sent to me
         var messages = await _context.Messages
             .Where(m => m.Sender == otherUser && m.Receiver == currentUser && !m.IsRead)
             .ToListAsync();
 
+        Console.WriteLine($"Found {messages.Count} unread messages to mark as seen.");
+        
         if (!messages.Any()) return;
 
         foreach (var m in messages)

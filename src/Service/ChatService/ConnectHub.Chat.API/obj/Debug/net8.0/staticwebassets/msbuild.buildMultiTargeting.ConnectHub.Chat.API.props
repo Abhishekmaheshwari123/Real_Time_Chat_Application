@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\ConnectHub.Chat.API.props" />
-</Project>
