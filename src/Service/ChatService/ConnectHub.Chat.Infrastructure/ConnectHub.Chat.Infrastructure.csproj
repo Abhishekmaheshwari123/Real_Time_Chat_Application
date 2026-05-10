@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ConnectHub.Chat.Domain\ConnectHub.Chat.Domain.csproj" />
+    <ProjectReference Include="..\ConnectHub.Chat.Application\ConnectHub.Chat.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

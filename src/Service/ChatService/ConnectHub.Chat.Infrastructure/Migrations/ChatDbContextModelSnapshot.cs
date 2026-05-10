@@ -37,6 +37,13 @@ namespace ConnectHub.Chat.Infrastructure.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
+                    b.Property<string>("MediaUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Receiver")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

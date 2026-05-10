@@ -16,3 +16,5 @@ C:\chat application\src\Service\ChatService\ConnectHub.Chat.Infrastructure\obj\D
 C:\chat application\src\Service\ChatService\ConnectHub.Chat.Infrastructure\obj\Debug\net8.0\ConnectHub.Chat.Infrastructure.pdb
 C:\chat application\src\Service\ChatService\ConnectHub.Chat.Infrastructure\obj\Debug\net8.0\ConnectHub.Chat.Infrastructure.genruntimeconfig.cache
 C:\chat application\src\Service\ChatService\ConnectHub.Chat.Infrastructure\obj\Debug\net8.0\ref\ConnectHub.Chat.Infrastructure.dll
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Infrastructure\bin\Debug\net8.0\ConnectHub.Chat.Application.dll
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Infrastructure\bin\Debug\net8.0\ConnectHub.Chat.Application.pdb

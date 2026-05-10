@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "2lUAo4v9L3c=",
+  "dgSpecHash": "3bl4RfuOQX4=",
   "success": true,
-  "projectFilePath": "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Infrastructure\\ConnectHub.Chat.Infrastructure.csproj",
+  "projectFilePath": "c:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Infrastructure\\ConnectHub.Chat.Infrastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mahes\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\mahes\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",

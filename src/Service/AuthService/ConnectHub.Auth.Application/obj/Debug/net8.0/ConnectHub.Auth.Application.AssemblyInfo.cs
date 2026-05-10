@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ConnectHub.Auth.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+75190eee9ca5a6cd419aebbd98680061e46deb8b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b1bf46f79167d908f141cac4fb0e7cc5464fb184")]
 [assembly: System.Reflection.AssemblyProductAttribute("ConnectHub.Auth.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ConnectHub.Auth.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

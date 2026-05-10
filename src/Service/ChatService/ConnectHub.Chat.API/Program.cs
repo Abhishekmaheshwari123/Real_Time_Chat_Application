@@ -5,7 +5,7 @@ using System.Text;
 using System.Security.Claims;
 using ConnectHub.Chat.Infrastructure; // Replace with your actual namespace
 using Microsoft.EntityFrameworkCore;
-using ConnectHub.Chat.API.Hubs; // Replace with your actual namespace
+using ConnectHub.Chat.API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 

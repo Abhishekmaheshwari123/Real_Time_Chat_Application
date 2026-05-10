@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ConnectHub - WhatsApp Style</title>
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #efeae2; }
+        .header { background: #075e54; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; height: 50px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .container { display: flex; height: calc(100vh - 70px); }
+        
+        /* SIDEBAR */
+        .sidebar { width: 30%; background: #ffffff; border-right: 1px solid #ddd; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px; font-weight: bold; background: #ededed; border-bottom: 1px solid #ddd; }
+        .search-container { padding: 10px; background: #fff; border-bottom: 1px solid #eee; }
+        .search-container input { width: 90%; padding: 10px; border-radius: 20px; border: 1px solid #ddd; outline: none; background: #f0f2f5; }
+        #chatList { flex: 1; overflow-y: auto; }
+
+        /* CHAT AREA */
+        .chat-area { width: 70%; display: flex; flex-direction: column; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
+        .active-chat-header { padding: 15px 20px; background: #ededed; border-bottom: 1px solid #ddd; font-weight: bold; font-size: 16px; }
+        #chat { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
+
+        /* MESSAGES */
+        .message { max-width: 60%; padding: 8px 12px; margin: 5px 0; border-radius: 8px; font-size: 14px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .sent { background: #dcf8c6; align-self: flex-end; border-top-right-radius: 0; }
+        .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
+        .status-text { font-size: 11px; color: #888; text-align: right; margin-top: 4px; }
+
+        /* SIDEBAR ITEMS */
+        .chat-item { padding: 12px 15px; border-bottom: 1px solid #f2f2f2; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .chat-item:hover { background: #f5f5f5; }
+        .chat-item.active { background: #ebebeb; }
+        .chat-info b { font-size: 14px; display: block; color: #000; }
+        .chat-info small { color: #666; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 180px; }
+        .badge { background: #25d366; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+
+        .input-box { display: flex; padding: 10px; background: #f0f0f0; }
+        .input-box input { flex: 1; padding: 12px 15px; border-radius: 25px; border: none; outline: none; margin-right: 10px; font-size: 15px; }
+        .input-box button { background: #075e54; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+
+        .tick.seen {
+                    color: #4fc3f7; /* blue */
+}
+
+        .date-divider {
+                        text-align: center; margin: 10px 0;font-size: 12px; color: #666; background: #e1f3fb;
+                        padding: 5px 10px;border-radius: 10px; width: fit-content; align-self: center;
+                    }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2 style="margin:0">ConnectHub</h2>
+    <div>
+        🔔 <span id="globalBadge" class="badge" style="background:red; display:none">0</span>
+        <button onclick="logout()" style="margin-left:10px;">Logout</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="sidebar-header">Recent Chats</div>
+        <div class="search-container">
+            <input id="searchChat" placeholder="Search or start new chat..." onkeypress="if(event.key==='Enter') startNewChat()" />
+        </div>
+        <div id="chatList"></div>
+    </div>
+
+    <div class="chat-area">
+        <div class="active-chat-header" id="chatHeader">Select a chat</div>
+        <div id="chat"></div>
+        <div class="input-box">
+            <input id="messageInput" placeholder="Type a message" onkeypress="if(event.key==='Enter') sendMessage()" />
+            <button onclick="sendMessage()">SEND</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/@microsoft/signalr@7.0.5/dist/browser/signalr.js"></script>
+<script>
+    let lastRenderedDate = "";
+    const token = localStorage.getItem("connecthub_token");
+    const currentUser = JSON.parse(localStorage.getItem("connecthub_user"))?.email;
+    let activePartner = ""; 
+
+    if (!token) window.location.href = "login.html";
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("http://localhost:5262/chatHub", { accessTokenFactory: () => token })
+        .withAutomaticReconnect()
+        .build();
+
+    /* ================= SIGNALR HANDLERS ================= */
+    connection.on("ReceiveMessage", (data) => {
+        const sender = data.sender || data.Sender;
+        const receiver = data.receiver || data.Receiver;
+        const content = data.message || data.content || data.Content;
+        
+        const partner = (sender === currentUser) ? receiver : sender;
+        
+        if (partner === activePartner) {
+            appendMessage(data);
+
+            // ✅ ALWAYS mark seen if message belongs to active chat
+            if (sender !== currentUser) {
+                connection.invoke("MarkAsSeen", sender);
+            }
+        }
+        
+        
+        addChatToSidebar(partner, 0, content);
+    });
+
+    connection.on("MessageDelivered", (data) => {
+        const msg = document.getElementById("msg-" + data.id);
+        if (msg) {
+            const tick = msg.querySelector(".tick");
+            if (tick) tick.innerText = "✓✓";
+        }
+    });
+
+    connection.on("MessagesSeen", (ids) => {
+        console.log("Seen event received:", ids); // DEBUG
+
+        ids.forEach(id => {
+            const msg = document.getElementById("msg-" + id);
+
+            if (msg) {
+                const tick = msg.querySelector(".tick");
+
+                if (tick) {
+                    tick.innerText = "✓✓";
+                    tick.classList.add("seen"); // ✅ THIS MAKES IT BLUE
+                }
+            }
+        });
+    });
+
+    connection.on("ReceiveNotification", (data) => {
+        if (activePartner !== data.from) {
+            addChatToSidebar(data.from, 1, data.message);
+            updateGlobalBadge(1);
+        }
+    });
+
+    /* ================= UI LOGIC ================= */
+    function addChatToSidebar(email, count = 0, lastMsg = "") {
+        if (!email) return;
+        const list = document.getElementById("chatList");
+        let item = document.getElementById("chat-" + email);
+
+        if (item) {
+            if (lastMsg) item.querySelector("small").innerText = lastMsg;
+            if (count > 0) {
+                const b = item.querySelector(".item-badge");
+                b.innerText = parseInt(b.innerText) + count;
+                b.style.display = "inline";
+            }
+            list.prepend(item);
+        } else {
+            const div = document.createElement("div");
+            div.className = "chat-item";
+            div.id = "chat-" + email;
+            div.innerHTML = `
+                <div class="chat-info">
+                    <b>${email}</b>
+                    <small>${lastMsg || 'Starting conversation...'}</small>
+                </div>
+                <span class="badge item-badge" style="${count > 0 ? '' : 'display:none'}">${count}</span>
+            `;
+            div.onclick = () => selectUser(email);
+            list.prepend(div);
+        }
+    }
+
+    async function selectUser(email) {
+        activePartner = email;
+        document.getElementById("chatHeader").innerText = email;
+        
+        document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+        document.getElementById("chat-" + email)?.classList.add('active');
+
+        const item = document.getElementById("chat-" + email);
+        const b = item?.querySelector(".item-badge");
+        if (b && b.style.display !== "none") {
+            updateGlobalBadge(-parseInt(b.innerText));
+            b.innerText = "0";
+            b.style.display = "none";
+        }
+
+        await loadHistory(email);
+    }
+
+    function formatDateLabel(date) {
+        const today = new Date();
+        const msgDate = new Date(date);
+
+        const isToday = today.toDateString() === msgDate.toDateString();
+
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+        const isYesterday = yesterday.toDateString() === msgDate.toDateString();
+
+        if (isToday) return "Today";
+        if (isYesterday) return "Yesterday";
+
+        return msgDate.toLocaleDateString();
+    }
+
+    function startNewChat() {
+        const email = document.getElementById("searchChat").value.trim();
+        if (email && email !== currentUser) {
+            addChatToSidebar(email, 0, "");
+            selectUser(email);
+            document.getElementById("searchChat").value = "";
+        }
+    }
+
+    async function loadHistory(email) {
+        const res = await fetch(`http://localhost:5262/api/chat/history/${email}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const chatBox = document.getElementById("chat");
+        chatBox.innerHTML = "";
+        lastRenderedDate = "";
+        data.forEach(m => appendMessage(m));
+        await connection.invoke("MarkAsSeen", email);
+    }
+
+    /* ✅ UPDATED ONLY THIS FUNCTION */
+    function appendMessage(data) {
+        const chatBox = document.getElementById("chat");
+
+        const sender = data.sender || data.Sender;
+        const content = data.message || data.content || data.Content;
+        const time = data.sentAt || data.SentAt;
+        const status = data.status || data.Status;
+
+        let tickHtml = "";
+
+        if (sender === currentUser) {
+            if (status === "Sent") tickHtml = `<span class="tick">✓</span>`;
+            else if (status === "Delivered") tickHtml = `<span class="tick">✓✓</span>`;
+            else if (status === "Seen") tickHtml = `<span class="tick seen">✓✓</span>`;
+        }
+
+        const messageDate = new Date(time);
+        const currentDateLabel = formatDateLabel(messageDate);
+
+        // ✅ ADD DATE DIVIDER
+        if (lastRenderedDate !== currentDateLabel) {
+            lastRenderedDate = currentDateLabel;
+
+            const dateDiv = document.createElement("div");
+            dateDiv.className = "date-divider";
+            dateDiv.innerText = currentDateLabel;
+
+            chatBox.appendChild(dateDiv);
+        }
+
+        // format time
+        let formattedTime = "";
+        if (time) {
+            formattedTime = messageDate.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // tick logic
+        let tick = "";
+        if (sender === currentUser) {
+            if (status === "Sent") tick = "✓";
+            else if (status === "Delivered") tick = "✓✓";
+            else if (status === "Seen") tick = `<span class="tick seen">✓✓</span>`;
+        }
+
+        const div = document.createElement("div");
+        div.className = `message ${sender === currentUser ? 'sent' : 'received'}`;
+        div.id = data.id ? "msg-" + data.id : "";
+
+        div.innerHTML = `
+            <div>${content}</div>
+            <div class="message-footer">
+                <span>${formattedTime}</span>
+                ${sender === currentUser ? tickHtml : ""}
+            </div>
+        `;
+
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function sendMessage() {
+        const input = document.getElementById("messageInput");
+        if (!activePartner || !input.value.trim()) return;
+        connection.invoke("SendMessage", activePartner, input.value);
+        input.value = "";
+    }
+
+    function updateGlobalBadge(diff) {
+        const b = document.getElementById("globalBadge");
+        const val = Math.max(0, parseInt(b.innerText) + diff);
+        b.innerText = val;
+        b.style.display = val > 0 ? "inline" : "none";
+    }
+
+    async function start() {
+        try {
+            await connection.start();
+            
+            const cRes = await fetch("http://localhost:5262/api/chat/conversations", { 
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const convs = await cRes.json();
+            const chatList = document.getElementById("chatList");
+            chatList.innerHTML = ""; // ✅ clear old list
+
+            convs
+                .sort((a, b) => new Date(b.Time) - new Date(a.Time)) // ✅ latest first
+                .forEach(c => {
+                    addChatToSidebar(c.User, 0, c.LastMessage);
+                });
+
+            const uRes = await fetch("http://localhost:5262/api/chat/unread", { 
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const unreads = await uRes.json();
+            unreads.forEach(u => {
+                addChatToSidebar(u.user, u.count);
+            });
+            
+        } catch (err) { console.error("Start failed:", err); }
+    }
+
+    start();
+    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+</script>
+</body>
+</html>

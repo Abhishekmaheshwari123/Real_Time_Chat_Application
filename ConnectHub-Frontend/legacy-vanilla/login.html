@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+
+<h2>Login Page</h2>
+
+<input id="email" placeholder="Email" />
+<br><br>
+
+<input id="password" type="password" placeholder="Password" />
+<br><br>
+
+<button onclick="login()">Login</button>
+
+<script>
+const TOKEN_KEY = "connecthub_token";
+const USER_KEY = "connecthub_user";
+
+// ✅ AUTO REDIRECT IF ALREADY LOGGED IN
+const existingToken = localStorage.getItem(TOKEN_KEY);
+if (existingToken) {
+    window.location.href = "index.html";
+}
+
+async function login() {
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    if (!email || !password) {
+        alert("Please enter email and password");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:5221/api/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+        console.log("LOGIN RESPONSE:", data);
+
+        if (!response.ok) {
+            alert(data.message || "Login failed");
+            return;
+        }
+
+        if (data.token) {
+            localStorage.setItem(TOKEN_KEY, data.token);
+            localStorage.setItem("token", data.token);
+
+            if (data.user) {
+                localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+            }
+
+            alert("Login Successful!");
+
+            window.location.href = "index.html";
+        } else {
+            alert("Token not received from server");
+        }
+
+    } catch (err) {
+        console.error("LOGIN ERROR:", err);
+        alert("Server not reachable");
+    }
+}
+</script>
+
+</body>
+</html>
