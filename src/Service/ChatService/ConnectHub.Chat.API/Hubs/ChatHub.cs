@@ -18,15 +18,18 @@ public class ChatHub : Hub
     }
 
     // ================= SEND MESSAGE =================
-    public async Task SendMessage(string receiver, string message)
+    public async Task SendMessage(string receiver, string message, string? mediaUrl = null, string messageType = "text")
     {
         var sender = Context.User?.FindFirst(ClaimTypes.Email)?.Value;
+        var normalizedMessageType = (messageType ?? "text").Trim().ToLowerInvariant();
 
         var chat = new Message
         {
             Sender = sender,
             Receiver = receiver,
             Content = message,
+            MediaUrl = mediaUrl,
+            MessageType = normalizedMessageType,
             SentAt = DateTime.UtcNow,
             Status = "Sent",
             IsRead = false
@@ -40,6 +43,8 @@ public class ChatHub : Hub
             sender = sender, 
             receiver = receiver, 
             message = message, 
+            mediaUrl = mediaUrl,
+            messageType = normalizedMessageType,
             status = "Sent",
             sentAt = chat.SentAt
         };

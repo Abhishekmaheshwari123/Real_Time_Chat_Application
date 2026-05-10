@@ -92,7 +92,8 @@ public async Task<IActionResult> GetUnreadCounts()
             conversations.Add(new
             {
                 User = user,
-                LastMessage = lastMessage?.Content ?? "",
+                LastMessage = !string.IsNullOrEmpty(lastMessage?.Content) ? lastMessage.Content : 
+                             (lastMessage?.MessageType != "text" ? $"[{lastMessage?.MessageType}]" : ""),
                 Time = lastMessage?.SentAt ?? DateTime.MinValue,
                 UnreadCount = unreadCount
             });
@@ -112,12 +113,15 @@ public async Task<IActionResult> GetUnreadCounts()
     {
         var sender = User.FindFirst(ClaimTypes.Email)?.Value;
         if (sender == null) return Unauthorized();
+        var normalizedMessageType = (dto.MessageType ?? "text").Trim().ToLowerInvariant();
 
         var msg = new Message
         {
             Sender = sender,
             Receiver = dto.Receiver,
             Content = dto.Content,
+            MediaUrl = dto.MediaUrl,
+            MessageType = normalizedMessageType,
             SentAt = DateTime.UtcNow,
             Status = "Sent"
         };

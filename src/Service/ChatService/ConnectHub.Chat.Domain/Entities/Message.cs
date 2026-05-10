@@ -8,6 +8,8 @@ public class Message
     public string Receiver { get; set; }
 
     public string Content { get; set; }
+    public string? MediaUrl { get; set; }
+    public string MessageType { get; set; } = "text"; // text, image, video, file
 
     public DateTime SentAt { get; set; }
 
