@@ -23,12 +23,15 @@ var allowedOrigins = builder.Configuration
     .Get<string[]>()
     ?? new[]
     {
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
         "http://127.0.0.1:5173",
         "http://localhost:5173",
+        "http://127.0.0.1:7000",
+        "http://localhost:7000",
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
         "http://127.0.0.1:3000",
-        "http://localhost:3000"
+        "http://localhost:3000",
+        "https://deft-blancmange-e4b2a1.netlify.app"
     };
 
 // ==========================
@@ -37,8 +40,9 @@ var allowedOrigins = builder.Configuration
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("AuthDbConnection")
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("AuthDbConnection"),
+        x => x.MigrationsAssembly("ConnectHub.Auth.API")
     )
 );
 
@@ -121,6 +125,24 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+// ==========================
+// AUTO-MIGRATIONS
+// ==========================
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AuthDbContext>();
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating the database.");
+    }
+}
 
 // ==========================
 // MIDDLEWARE PIPELINE

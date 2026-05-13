@@ -1,0 +1,401 @@
+{
+  "info": {
+    "_postman_id": "c2a0c1dd-7a12-4d8e-9c7c-0d6e8f4d1a3f",
+    "name": "ConnectHub APIs",
+    "description": "Postman collection for ConnectHub backend services in src/Service.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth Service",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"john.doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"P@ssw0rd123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5221/api/auth/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5221",
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"P@ssw0rd123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5221/api/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5221",
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Google Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"credential\": \"YOUR_GOOGLE_ID_TOKEN\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5221/api/auth/google",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5221",
+              "path": [
+                "api",
+                "auth",
+                "google"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5221/api/auth/profile",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5221",
+              "path": [
+                "api",
+                "auth",
+                "profile"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Chat Service",
+      "item": [
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receiver\": \"jane.doe@example.com\",\n  \"content\": \"Hello from Postman\",\n  \"mediaUrl\": null,\n  \"messageType\": \"text\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5262/api/chat/send",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5262",
+              "path": [
+                "api",
+                "chat",
+                "send"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Conversation History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5262/api/chat/history/jane.doe@example.com",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5262",
+              "path": [
+                "api",
+                "chat",
+                "history",
+                "jane.doe@example.com"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Unread Counts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5262/api/chat/unread",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5262",
+              "path": [
+                "api",
+                "chat",
+                "unread"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5262/api/chat/conversations",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5262",
+              "path": [
+                "api",
+                "chat",
+                "conversations"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Media Service",
+      "item": [
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:5264/api/media/upload",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5264",
+              "path": [
+                "api",
+                "media",
+                "upload"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notification Service",
+      "item": [
+        {
+          "name": "Generate Token",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5226/generate-token",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5226",
+              "path": [
+                "generate-token"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Notification (API)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipientId\": \"user1\",\n  \"type\": \"MESSAGE\",\n  \"relatedId\": null,\n  \"message\": \"You have a new message\",\n  \"isRead\": false,\n  \"createdAt\": \"2026-05-13T00:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5226/api/notification",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5226",
+              "path": [
+                "api",
+                "notification"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Notifications By User",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:5226/api/notification/user1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5226",
+              "path": [
+                "api",
+                "notification",
+                "user1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification As Read",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "http://localhost:5226/api/notification/read/00000000-0000-0000-0000-000000000000",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5226",
+              "path": [
+                "api",
+                "notification",
+                "read",
+                "00000000-0000-0000-0000-000000000000"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Send Notification From Program",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipientId\": \"user1\",\n  \"type\": \"MESSAGE\",\n  \"relatedId\": null,\n  \"message\": \"Hello from the /notifications endpoint\",\n  \"isRead\": false,\n  \"createdAt\": \"2026-05-13T00:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5226/notifications",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5226",
+              "path": [
+                "notifications"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

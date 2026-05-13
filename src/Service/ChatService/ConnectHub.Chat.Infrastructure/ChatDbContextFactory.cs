@@ -10,8 +10,9 @@ public class ChatDbContextFactory : IDesignTimeDbContextFactory<ChatDbContext>
     {
         var optionsBuilder = new DbContextOptionsBuilder<ChatDbContext>();
 
-        optionsBuilder.UseSqlServer(
-            "Server=.;Database=ChatDB;Trusted_Connection=True;TrustServerCertificate=True"
+        optionsBuilder.UseNpgsql(
+            "Host=ep-orange-fog-appzs48p-pooler.c-7.us-east-1.aws.neon.tech; Database=MediaDB; Username=neondb_owner; Password=npg_HU2bfrz0oITe; SSL Mode=VerifyFull; Channel Binding=Require;",
+            x => x.MigrationsAssembly("ConnectHub.Chat.API")
         );
 
         return new ChatDbContext(optionsBuilder.Options);

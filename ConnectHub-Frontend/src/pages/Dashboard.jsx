@@ -148,7 +148,7 @@ const Dashboard = () => {
                                 return (
                                         <React.Fragment key={m.id || i}>
                                         {showDivider && <div className="date-divider">{currentDate}</div>}
-                                        <div className={`message ${( (m.sender || m.Sender)?.toLowerCase() === user?.email?.toLowerCase() ) ? 'sent' : 'received'}`}>
+                                      <div className={`message ${( (m.sender || m.Sender)?.toLowerCase() === user?.email?.toLowerCase() ) ? 'sent' : 'received'}`}>
                                             {messageType === "image" ? (
                                                 <img src={mediaUrl} alt="shared media" className="message-image" />
                                             ) : messageType === "video" ? (

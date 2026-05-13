@@ -1,7 +1,7 @@
 {
   "format": 1,
   "restore": {
-    "c:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Infrastructure\\ConnectHub.Chat.Infrastructure.csproj": {}
+    "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Infrastructure\\ConnectHub.Chat.Infrastructure.csproj": {}
   },
   "projects": {
     "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Application\\ConnectHub.Chat.Application.csproj": {
@@ -127,14 +127,14 @@
         }
       }
     },
-    "c:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Infrastructure\\ConnectHub.Chat.Infrastructure.csproj": {
+    "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Infrastructure\\ConnectHub.Chat.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Infrastructure\\ConnectHub.Chat.Infrastructure.csproj",
+        "projectUniqueName": "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Infrastructure\\ConnectHub.Chat.Infrastructure.csproj",
         "projectName": "ConnectHub.Chat.Infrastructure",
-        "projectPath": "c:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Infrastructure\\ConnectHub.Chat.Infrastructure.csproj",
+        "projectPath": "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Infrastructure\\ConnectHub.Chat.Infrastructure.csproj",
         "packagesPath": "C:\\Users\\mahes\\.nuget\\packages\\",
-        "outputPath": "c:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Infrastructure\\obj\\",
+        "outputPath": "C:\\chat application\\src\\Service\\ChatService\\ConnectHub.Chat.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\mahes\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -177,13 +177,13 @@
               "target": "Package",
               "version": "[8.0.0, )"
             },
-            "Microsoft.EntityFrameworkCore.SqlServer": {
-              "target": "Package",
-              "version": "[8.0.0, )"
-            },
             "Microsoft.EntityFrameworkCore.Tools": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[8.0.0, )"
             }

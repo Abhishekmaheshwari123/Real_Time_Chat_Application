@@ -1,41 +1,41 @@
-using System;
-using ConnectHub.Media.Application.Services;
-using System.IO;
-using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
+using ConnectHub.Media.Application.Services;
 using Microsoft.Extensions.Configuration;
 
-namespace ConnectHub.Media.Infrastructure.Services;
+namespace ConnectHub.Media.API.Services;
 
 public class BlobStorageService : IBlobStorageService
 {
-    private readonly BlobContainerClient _containerClient;
+    private readonly BlobServiceClient _blobServiceClient;
+    private readonly string _containerName;
 
     public BlobStorageService(IConfiguration configuration)
     {
         var connectionString = configuration["AzureStorage:ConnectionString"];
-        var containerName = configuration["AzureStorage:ContainerName"];
-        if (string.IsNullOrWhiteSpace(connectionString) || string.IsNullOrWhiteSpace(containerName))
+        _containerName = configuration["AzureStorage:ContainerName"] ?? "chat-media";
+        if (string.IsNullOrWhiteSpace(connectionString))
         {
-            throw new InvalidOperationException("Azure storage configuration is missing.");
+            throw new InvalidOperationException("Azure storage connection string is missing.");
         }
-        var blobServiceClient = new BlobServiceClient(connectionString);
-        _containerClient = blobServiceClient.GetBlobContainerClient(containerName);
-        _containerClient.CreateIfNotExists();
+
+        _blobServiceClient = new BlobServiceClient(connectionString);
     }
 
-    public async Task<string> UploadFileAsync(Stream stream, string fileName, string contentType)
+    public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType)
     {
-        if (stream == null) throw new ArgumentNullException(nameof(stream));
+        if (fileStream == null) throw new ArgumentNullException(nameof(fileStream));
         if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentException("File name must be provided", nameof(fileName));
 
-        await _containerClient.CreateIfNotExistsAsync();
+        var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
+        await containerClient.CreateIfNotExistsAsync();
 
-        var blobClient = _containerClient.GetBlobClient(Guid.NewGuid().ToString() + "_" + fileName);
-        var blobHttpHeaders = new BlobHttpHeaders { ContentType = contentType };
-        await blobClient.UploadAsync(stream, new BlobUploadOptions { HttpHeaders = blobHttpHeaders });
+        var safeFileName = Path.GetFileName(fileName);
+        var blobClient = containerClient.GetBlobClient($"{Guid.NewGuid()}_{safeFileName}");
+
+        var blobHttpHeader = new BlobHttpHeaders { ContentType = contentType ?? "application/octet-stream" };
+        await blobClient.UploadAsync(fileStream, new BlobUploadOptions { HttpHeaders = blobHttpHeader });
 
         if (!blobClient.CanGenerateSasUri)
         {
@@ -44,7 +44,7 @@ public class BlobStorageService : IBlobStorageService
 
         var sasBuilder = new BlobSasBuilder
         {
-            BlobContainerName = _containerClient.Name,
+            BlobContainerName = containerClient.Name,
             BlobName = blobClient.Name,
             Resource = "b",
             StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
