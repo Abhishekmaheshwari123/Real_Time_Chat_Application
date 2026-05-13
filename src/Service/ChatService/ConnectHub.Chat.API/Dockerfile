@@ -5,7 +5,7 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy csproj files
+# Copy project files
 COPY ["src/Service/ChatService/ConnectHub.Chat.API/ConnectHub.Chat.API.csproj", "src/Service/ChatService/ConnectHub.Chat.API/"]
 
 COPY ["src/Service/ChatService/ConnectHub.Chat.Application/ConnectHub.Chat.Application.csproj", "src/Service/ChatService/ConnectHub.Chat.Application/"]
@@ -17,10 +17,10 @@ COPY ["src/Service/ChatService/ConnectHub.Chat.Infrastructure/ConnectHub.Chat.In
 # Restore dependencies
 RUN dotnet restore "src/Service/ChatService/ConnectHub.Chat.API/ConnectHub.Chat.API.csproj"
 
-# Copy everything
+# Copy all source code
 COPY . .
 
-# Move to API project
+# Move into API project directory
 WORKDIR "/src/src/Service/ChatService/ConnectHub.Chat.API"
 
 # Build
@@ -30,7 +30,7 @@ RUN dotnet build "ConnectHub.Chat.API.csproj" -c Release -o /app/build
 FROM build AS publish
 RUN dotnet publish "ConnectHub.Chat.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Final runtime image
+# Final image
 FROM base AS final
 WORKDIR /app
 
