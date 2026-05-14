@@ -3,7 +3,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ConnectHub.Media.Application.Services;
 using ConnectHub.Media.API.Services;
+<<<<<<< HEAD
 using Microsoft.OpenApi.Models;
+=======
+>>>>>>> 63943581c9f79be279c2a0841674ffa1d34db81f
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +17,7 @@ builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddControllers();
 builder.Services.AddAuthorization();
 
+<<<<<<< HEAD
 // SWAGGER/OPENAPI CONFIGURATION
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -49,6 +53,8 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+=======
+>>>>>>> 63943581c9f79be279c2a0841674ffa1d34db81f
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -83,6 +89,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+<<<<<<< HEAD
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
@@ -90,6 +97,8 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty; // Sets Swagger UI at root
 });
 
+=======
+>>>>>>> 63943581c9f79be279c2a0841674ffa1d34db81f
 app.UseRouting();
 
 app.UseCors();

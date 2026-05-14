@@ -1,0 +1,9 @@
+﻿C:\chat application\src\Service\Gateway\ConnectHub.ApiGateway\Program.cs
+C:\chat application\src\Service\Gateway\ConnectHub.ApiGateway\obj\Debug\net8.0\ConnectHub.ApiGateway.GlobalUsings.g.cs
+C:\chat application\src\Service\Gateway\ConnectHub.ApiGateway\obj\Debug\net8.0\.NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+C:\chat application\src\Service\Gateway\ConnectHub.ApiGateway\obj\Debug\net8.0\ConnectHub.ApiGateway.AssemblyInfo.cs
+C:\chat application\src\Service\Gateway\ConnectHub.ApiGateway\appsettings.Development.json
+C:\chat application\src\Service\Gateway\ConnectHub.ApiGateway\appsettings.json
+C:\chat application\src\Service\Gateway\ConnectHub.ApiGateway\.env
+C:\chat application\src\Service\Gateway\ConnectHub.ApiGateway\Dockerfile
+C:\chat application\src\Service\Gateway\ConnectHub.ApiGateway\Properties\launchSettings.json

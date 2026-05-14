@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ProjectInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">
+  <ProjectName>ConnectHub.Auth.Infrastructure</ProjectName>
+  <ProjectLanguage>C#</ProjectLanguage>
+  <ProjectType>Product</ProjectType>
+  <ProjectGuid>f8c98002-b38d-4710-918c-094fe7d4c977</ProjectGuid>
+  <FullPath>C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\ConnectHub.Auth.Infrastructure.csproj</FullPath>
+  <IsExcluded>false</IsExcluded>
+  <AnalysisResultFiles>
+    <AnalysisResultFile Id="FilesToAnalyze" Location="C:\chat application\.sonarqube\conf\26\FilesToAnalyze.txt" />
+  </AnalysisResultFiles>
+  <AnalysisSettings>
+    <Property Name="sonar.cs.roslyn.reportFilePaths">C:\chat application\.sonarqube\out\26\Issues.json</Property>
+    <Property Name="sonar.cs.analyzer.projectOutPaths">C:\chat application\.sonarqube\out\26</Property>
+    <Property Name="sonar.cs.scanner.telemetry">C:\chat application\.sonarqube\out\26\Telemetry.json</Property>
+  </AnalysisSettings>
+  <Configuration>Debug</Configuration>
+  <Platform>AnyCPU</Platform>
+  <TargetFramework>net8.0</TargetFramework>
+</ProjectInfo>

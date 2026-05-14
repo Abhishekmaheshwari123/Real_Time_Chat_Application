@@ -1,0 +1,3 @@
+﻿C:\chat application\src\Service\ChatService\ConnectHub.Chat.Infrastructure\ChatDbContext.cs
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Infrastructure\ChatDbContextFactory.cs
+C:\chat application\src\Service\ChatService\ConnectHub.Chat.Infrastructure\Class1.cs

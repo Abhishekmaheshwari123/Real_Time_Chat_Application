@@ -1,0 +1,32 @@
+Product projects
+---------------------------------------
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Domain\ConnectHub.Auth.Domain.csproj
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.API\ConnectHub.Auth.API.csproj
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\ConnectHub.Auth.Infrastructure.csproj
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Application\ConnectHub.Auth.Application.csproj
+
+
+Test projects
+---------------------------------------
+C:\chat application\tests\MediaService\ConnectHub.Media.API.Tests\ConnectHub.Media.API.Tests.csproj
+C:\chat application\tests\NotificationService\ConnectHub.Notification.API.Tests\ConnectHub.Notification.API.Tests.csproj
+C:\chat application\tests\AuthService\ConnectHub.Auth.API.Tests\ConnectHub.Auth.API.Tests.csproj
+C:\chat application\tests\ChatService\ConnectHub.Chat.API.Tests\ConnectHub.Chat.API.Tests.csproj
+C:\chat application\tests\Gateway\ConnectHub.ApiGateway.Tests\ConnectHub.ApiGateway.Tests.csproj
+
+
+Invalid projects
+---------------------------------------
+{none}
+
+
+Skipped projects
+---------------------------------------
+{none}
+
+
+Excluded projects
+---------------------------------------
+{none}
+
+

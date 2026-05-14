@@ -1,0 +1,16 @@
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\obj\Debug\net8.0\ConnectHub.Auth.Infrastructure.csproj.AssemblyReference.cache
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\obj\Debug\net8.0\ConnectHub.Auth.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\obj\Debug\net8.0\ConnectHub.Auth.Infrastructure.AssemblyInfoInputs.cache
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\obj\Debug\net8.0\ConnectHub.Auth.Infrastructure.AssemblyInfo.cs
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\obj\Debug\net8.0\ConnectHub.Auth.Infrastructure.csproj.CoreCompileInputs.cache
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\obj\Debug\net8.0\ConnectHub.Auth.Infrastructure.sourcelink.json
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\bin\Debug\net8.0\ConnectHub.Auth.Infrastructure.deps.json
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\bin\Debug\net8.0\ConnectHub.Auth.Infrastructure.dll
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\bin\Debug\net8.0\ConnectHub.Auth.Infrastructure.pdb
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\bin\Debug\net8.0\ConnectHub.Auth.Domain.dll
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\bin\Debug\net8.0\ConnectHub.Auth.Domain.pdb
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\obj\Debug\net8.0\ConnectH.B8B23923.Up2Date
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\obj\Debug\net8.0\ConnectHub.Auth.Infrastructure.dll
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\obj\Debug\net8.0\refint\ConnectHub.Auth.Infrastructure.dll
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\obj\Debug\net8.0\ConnectHub.Auth.Infrastructure.pdb
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Infrastructure\obj\Debug\net8.0\ref\ConnectHub.Auth.Infrastructure.dll
