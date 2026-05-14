@@ -12,6 +12,7 @@ const Login = () => {
 
     // Replace this with your actual Google Client ID
     const GOOGLE_CLIENT_ID = "460935468037-rfmafkhgvbtqvnevecln34njkl0icl6m.apps.googleusercontent.com";
+    const API_GATEWAY_URL = 'http://localhost:7000';
 
     useEffect(() => {
         /* global google */
@@ -35,7 +36,7 @@ const Login = () => {
 
     const handleGoogleResponse = async (response) => {
         try {
-            const res = await fetch(`http://localhost:5221/api/auth/google`, {
+            const res = await fetch(`${API_GATEWAY_URL}/api/auth/google`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ credential: response.credential })
@@ -56,10 +57,10 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const endpoint = isRegister ? 'register' : 'login';
-        const body = isRegister ? { username, email, password } : { email, password };
+        const body = isRegister ? { userName: username, email, password } : { email, password };
 
         try {
-            const res = await fetch(`http://localhost:5221/api/auth/${endpoint}`, {
+            const res = await fetch(`${API_GATEWAY_URL}/api/auth/${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)

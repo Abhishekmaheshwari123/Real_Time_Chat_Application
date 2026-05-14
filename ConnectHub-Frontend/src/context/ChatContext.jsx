@@ -3,9 +3,9 @@ import * as signalR from '@microsoft/signalr';
 import { useAuth } from './AuthContext';
 
 const ChatContext = createContext();
+const API_GATEWAY_URL = 'http://localhost:7000';
 const MEDIA_UPLOAD_ENDPOINTS = [
-    'http://localhost:5265/api/media/upload',
-    'http://localhost:5264/api/media/upload'
+    `${API_GATEWAY_URL}/api/media/upload`
 ];
 
 export const ChatProvider = ({ children }) => {
@@ -54,7 +54,7 @@ export const ChatProvider = ({ children }) => {
     useEffect(() => {
         if (token) {
             const newConnection = new signalR.HubConnectionBuilder()
-                .withUrl("http://localhost:5262/chatHub", { accessTokenFactory: () => token })
+                .withUrl(`${API_GATEWAY_URL}/chatHub`, { accessTokenFactory: () => token })
                 .withAutomaticReconnect()
                 .build();
             setConnection(newConnection);
@@ -119,7 +119,7 @@ export const ChatProvider = ({ children }) => {
     const fetchConversations = async () => {
         if (!token) return;
         try {
-            const res = await fetch("http://localhost:5262/api/chat/conversations", {
+            const res = await fetch(`${API_GATEWAY_URL}/api/chat/conversations`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             const data = await res.json();
@@ -130,7 +130,7 @@ export const ChatProvider = ({ children }) => {
     const fetchUnread = async () => {
         if (!token) return;
         try {
-            const res = await fetch("http://localhost:5262/api/chat/unread", {
+            const res = await fetch(`${API_GATEWAY_URL}/api/chat/unread`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
             const data = await res.json();
@@ -145,7 +145,7 @@ export const ChatProvider = ({ children }) => {
 
     const loadHistory = useCallback(async (email) => {
         if (!token) return;
-        const res = await fetch(`http://localhost:5262/api/chat/history/${email}`, {
+        const res = await fetch(`${API_GATEWAY_URL}/api/chat/history/${email}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();

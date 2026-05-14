@@ -4,6 +4,7 @@ using ConnectHub.Chat.Domain;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using ConnectHub.Chat.Application.Services;
 
 namespace ConnectHub.Chat.API.Hubs;
 
@@ -11,10 +12,12 @@ namespace ConnectHub.Chat.API.Hubs;
 public class ChatHub : Hub
 {
     private readonly ChatDbContext _context;
+    private readonly ChatService _notificationService;
 
-    public ChatHub(ChatDbContext context)
+    public ChatHub(ChatDbContext context, ChatService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     // ================= SEND MESSAGE =================
@@ -82,6 +85,7 @@ public class ChatHub : Hub
         }
 
         // ✅ 4. Notification (unchanged)
+        await _notificationService.SendMessage(sender, receiver, message);
         await Clients.User(receiver).SendAsync("ReceiveNotification", new { from = sender, message });
     }
 

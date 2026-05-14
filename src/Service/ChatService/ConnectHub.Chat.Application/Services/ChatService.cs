@@ -18,10 +18,17 @@ namespace ConnectHub.Chat.Application.Services
         {
             var messageId = Guid.NewGuid();
 
-            // 🔥 GET JWT TOKEN FROM CURRENT REQUEST
-            var token = _httpContextAccessor.HttpContext?
-                .Request.Headers["Authorization"]
-                .ToString();
+            var httpContext = _httpContextAccessor.HttpContext;
+
+            var token = httpContext?.Request.Headers["Authorization"].ToString();
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                var accessToken = httpContext?.Request.Query["access_token"].ToString();
+                if (!string.IsNullOrWhiteSpace(accessToken))
+                {
+                    token = $"Bearer {accessToken}";
+                }
+            }
 
             var notification = new
             {
@@ -33,13 +40,15 @@ namespace ConnectHub.Chat.Application.Services
 
             var request = new HttpRequestMessage(
                 HttpMethod.Post,
-                "http://localhost:5226/notifications"
+                "/notifications"
             );
 
             request.Content = JsonContent.Create(notification);
 
-            // 🔥 FORWARD TOKEN
-            request.Headers.Add("Authorization", token);
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                request.Headers.TryAddWithoutValidation("Authorization", token);
+            }
 
             var response = await _httpClient.SendAsync(request);
 
