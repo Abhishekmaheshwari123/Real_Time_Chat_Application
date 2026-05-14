@@ -3,6 +3,7 @@ using ConnectHub.Chat.Infrastructure;
 using ConnectHub.Chat.Domain;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using ConnectHub.Chat.Application.Services;
 
 namespace ConnectHub.Chat.API.Controllers;
 
@@ -11,17 +12,19 @@ namespace ConnectHub.Chat.API.Controllers;
 public class ChatController : ControllerBase
 {
     private readonly ChatDbContext _context;
+    private readonly ChatService _notificationService;
 
-    public ChatController(ChatDbContext context)
+    public ChatController(ChatDbContext context, ChatService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     // ================= HISTORY =================
     [HttpGet("history/{user}")]
     public async Task<IActionResult> GetHistory(string user)
     {
-        var currentUser = User.FindFirst(ClaimTypes.Email)?.Value;
+        var currentUser = User?.FindFirst(ClaimTypes.Email)?.Value;
         if (currentUser == null) return Unauthorized();
 
         var messages = await _context.Messages
@@ -38,7 +41,7 @@ public class ChatController : ControllerBase
 [HttpGet("unread")]
 public async Task<IActionResult> GetUnreadCounts()
 {
-    var currentUser = User.FindFirst(ClaimTypes.Email)?.Value;
+    var currentUser = User?.FindFirst(ClaimTypes.Email)?.Value;
     if (currentUser == null) return Unauthorized();
 
     var counts = await _context.Messages
@@ -61,7 +64,7 @@ public async Task<IActionResult> GetUnreadCounts()
    [HttpGet("conversations")]
     public async Task<IActionResult> GetConversations()
     {
-        var currentUser = User.FindFirst(ClaimTypes.Email)?.Value;
+        var currentUser = User?.FindFirst(ClaimTypes.Email)?.Value;
         if (currentUser == null) return Unauthorized();
 
         // ✅ Step 1: Get all unique users the current user has chatted with
@@ -92,7 +95,8 @@ public async Task<IActionResult> GetUnreadCounts()
             conversations.Add(new
             {
                 User = user,
-                LastMessage = lastMessage?.Content ?? "",
+                LastMessage = !string.IsNullOrEmpty(lastMessage?.Content) ? lastMessage.Content : 
+                             (lastMessage?.MessageType != "text" ? $"[{lastMessage?.MessageType}]" : ""),
                 Time = lastMessage?.SentAt ?? DateTime.MinValue,
                 UnreadCount = unreadCount
             });
@@ -110,20 +114,25 @@ public async Task<IActionResult> GetUnreadCounts()
     [HttpPost("send")]
     public async Task<IActionResult> SendMessage([FromBody] SendMessageDto dto)
     {
-        var sender = User.FindFirst(ClaimTypes.Email)?.Value;
+        var sender = User?.FindFirst(ClaimTypes.Email)?.Value;
         if (sender == null) return Unauthorized();
+        var normalizedMessageType = (dto.MessageType ?? "text").Trim().ToLowerInvariant();
 
         var msg = new Message
         {
             Sender = sender,
             Receiver = dto.Receiver,
             Content = dto.Content,
+            MediaUrl = dto.MediaUrl,
+            MessageType = normalizedMessageType,
             SentAt = DateTime.UtcNow,
             Status = "Sent"
         };
 
         _context.Messages.Add(msg);
         await _context.SaveChangesAsync();
+
+        await _notificationService.SendMessage(sender, dto.Receiver, dto.Content);
 
         return Ok(msg);
     }

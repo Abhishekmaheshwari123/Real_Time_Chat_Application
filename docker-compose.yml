@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  auth-api:
+    build:
+      context: src/Service/AuthService
+      dockerfile: ConnectHub.Auth.API/Dockerfile
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__AuthDbConnection=Server=host.docker.internal;Database=AuthDB;Trusted_Connection=True;TrustServerCertificate=True
+
+  chat-api:
+    build:
+      context: src/Service/ChatService
+      dockerfile: ConnectHub.Chat.API/Dockerfile
+    ports:
+      - "5002:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=host.docker.internal;Database=ChatDB;Trusted_Connection=True;TrustServerCertificate=True
+      - AzureStorage__ConnectionString=${AZURE_STORAGE_CONNECTION_STRING}
+      - AzureStorage__ContainerName=chat-media
+
+  media-api:
+    build:
+      context: src/Service/MediaService
+      dockerfile: ConnectHub.Media.API/Dockerfile
+    ports:
+      - "5003:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=host.docker.internal;Database=ChatDB;Trusted_Connection=True;TrustServerCertificate=True
+      - AzureStorage__ConnectionString=${AZURE_STORAGE_CONNECTION_STRING}
+      - AzureStorage__ContainerName=chat-media
+
+  notification-api:
+    build:
+      context: src/Service/NotificationService
+      dockerfile: ConnectHub.Notification.API/Dockerfile
+    ports:
+      - "5004:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__NotificationDb=Server=host.docker.internal;Database=NotificationDb;Trusted_Connection=True;TrustServerCertificate=True

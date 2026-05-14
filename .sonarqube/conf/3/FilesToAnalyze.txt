@@ -1,0 +1,2 @@
+﻿C:\chat application\src\Service\NotificationService\ConnectHub.Notification.Domain\Class1.cs
+C:\chat application\src\Service\NotificationService\ConnectHub.Notification.Domain\Entities\Notification.cs

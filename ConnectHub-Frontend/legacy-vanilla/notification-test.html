@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notification Test</title>
+</head>
+<body>
+
+<h2>Notification Test Page</h2>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+<script>
+async function start() {
+
+    // 🔥 FIXED TOKEN PARSING
+    const response = await fetch("http://localhost:5226/generate-token");
+    const data = await response.json();
+    const token = data.token;
+
+    console.log("Token:", token);
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("http://localhost:5226/notificationHub", {
+            accessTokenFactory: () => token
+        })
+        .build();
+
+    connection.on("ReceiveNotification", function (data) {
+        console.log("Received:", data);
+        alert("Message: " + data.message + " | Count: " + data.count);
+    });
+
+    try {
+        await connection.start();
+        console.log("Connected to SignalR");
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+start();
+</script>
+
+</body>
+</html>

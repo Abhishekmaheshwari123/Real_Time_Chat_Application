@@ -4,6 +4,7 @@ using ConnectHub.Chat.Domain;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using ConnectHub.Chat.Application.Services;
 
 namespace ConnectHub.Chat.API.Hubs;
 
@@ -11,22 +12,27 @@ namespace ConnectHub.Chat.API.Hubs;
 public class ChatHub : Hub
 {
     private readonly ChatDbContext _context;
+    private readonly ChatService _notificationService;
 
-    public ChatHub(ChatDbContext context)
+    public ChatHub(ChatDbContext context, ChatService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     // ================= SEND MESSAGE =================
-    public async Task SendMessage(string receiver, string message)
+    public async Task SendMessage(string receiver, string message, string? mediaUrl = null, string messageType = "text")
     {
         var sender = Context.User?.FindFirst(ClaimTypes.Email)?.Value;
+        var normalizedMessageType = (messageType ?? "text").Trim().ToLowerInvariant();
 
         var chat = new Message
         {
             Sender = sender,
             Receiver = receiver,
             Content = message,
+            MediaUrl = mediaUrl,
+            MessageType = normalizedMessageType,
             SentAt = DateTime.UtcNow,
             Status = "Sent",
             IsRead = false
@@ -40,6 +46,8 @@ public class ChatHub : Hub
             sender = sender, 
             receiver = receiver, 
             message = message, 
+            mediaUrl = mediaUrl,
+            messageType = normalizedMessageType,
             status = "Sent",
             sentAt = chat.SentAt
         };
@@ -77,6 +85,7 @@ public class ChatHub : Hub
         }
 
         // ✅ 4. Notification (unchanged)
+        await _notificationService.SendMessage(sender, receiver, message);
         await Clients.User(receiver).SendAsync("ReceiveNotification", new { from = sender, message });
     }
 

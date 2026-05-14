@@ -1,0 +1,2 @@
+﻿C:\chat application\src\Service\AuthService\ConnectHub.Auth.Domain\Class1.cs
+C:\chat application\src\Service\AuthService\ConnectHub.Auth.Domain\User.cs

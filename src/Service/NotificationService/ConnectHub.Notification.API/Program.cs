@@ -22,7 +22,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://127.0.0.1:5501")
+        policy.WithOrigins(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+                "http://localhost:7000",
+                "http://127.0.0.1:7000",
+                "http://localhost:3000",
+                "http://127.0.0.1:3000",
+                "http://127.0.0.1:5501",
+                "http://localhost:5501",
+                "https://deft-blancmange-e4b2a1.netlify.app")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -82,9 +91,9 @@ builder.Services.AddAuthorization();
 // DB
 // ========================
 builder.Services.AddDbContext<NotificationDbContext>(options =>
-    options.UseSqlServer(
+    options.UseNpgsql(
         builder.Configuration.GetConnectionString("NotificationDb"),
-        sql => sql.EnableRetryOnFailure()
+        x => x.MigrationsAssembly("ConnectHub.Notification.API")
     ));
 
 // ========================
@@ -140,6 +149,24 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+// ==========================
+// AUTO-MIGRATIONS
+// ==========================
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<NotificationDbContext>();
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred during database migration.");
+    }
+}
 
 // ========================
 // PIPELINE

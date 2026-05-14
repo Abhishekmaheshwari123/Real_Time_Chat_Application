@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SonarProjectConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sonarsource.com/msbuild/analyzer/2021/1">
+  <AnalysisConfigPath>C:\chat application\.sonarqube\conf\SonarQubeAnalysisConfig.xml</AnalysisConfigPath>
+  <ProjectPath>C:\chat application\src\Service\NotificationService\ConnectHub.Notification.Infrastructure\ConnectHub.Notification.Infrastructure.csproj</ProjectPath>
+  <FilesToAnalyzePath>C:\chat application\.sonarqube\conf\31\FilesToAnalyze.txt</FilesToAnalyzePath>
+  <OutPath>C:\chat application\.sonarqube\out\31</OutPath>
+  <ProjectType>Product</ProjectType>
+  <TargetFramework>net8.0</TargetFramework>
+</SonarProjectConfig>

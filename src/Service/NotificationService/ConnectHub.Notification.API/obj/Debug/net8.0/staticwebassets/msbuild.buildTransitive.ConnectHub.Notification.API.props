@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\buildMultiTargeting\ConnectHub.Notification.API.props" />
-</Project>
