@@ -3,10 +3,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ConnectHub.Media.Application.Services;
 using ConnectHub.Media.API.Services;
-<<<<<<< HEAD
-using Microsoft.OpenApi.Models;
-=======
->>>>>>> 63943581c9f79be279c2a0841674ffa1d34db81f
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,44 +13,6 @@ builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddControllers();
 builder.Services.AddAuthorization();
 
-<<<<<<< HEAD
-// SWAGGER/OPENAPI CONFIGURATION
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "ConnectHub Media API",
-        Version = "v1",
-        Description = "Media storage and retrieval service API"
-    });
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "Bearer"
-    });
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] { }
-        }
-    });
-});
-
-=======
->>>>>>> 63943581c9f79be279c2a0841674ffa1d34db81f
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -89,16 +47,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-<<<<<<< HEAD
-app.UseSwagger();
-app.UseSwaggerUI(options =>
-{
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "ConnectHub Media API v1");
-    options.RoutePrefix = string.Empty; // Sets Swagger UI at root
-});
-
-=======
->>>>>>> 63943581c9f79be279c2a0841674ffa1d34db81f
 app.UseRouting();
 
 app.UseCors();
