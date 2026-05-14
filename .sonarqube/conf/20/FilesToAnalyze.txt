@@ -1,8 +1,0 @@
-﻿C:\chat application\tests\ChatService\ConnectHub.Chat.API.Tests\ChatBusinessTests.cs
-C:\chat application\tests\ChatService\ConnectHub.Chat.API.Tests\ChatSmokeTests.cs
-C:\Users\mahes\.nuget\packages\microsoft.net.test.sdk\17.11.1\build\netcoreapp3.1\Microsoft.NET.Test.Sdk.Program.cs
-C:\Users\mahes\.nuget\packages\microsoft.testplatform.testhost\17.11.1\build\netcoreapp3.1\x64\testhost.exe
-C:\Users\mahes\.nuget\packages\microsoft.testplatform.testhost\17.11.1\build\netcoreapp3.1\x64\testhost.dll
-C:\Users\mahes\.nuget\packages\mstest.testadapter\3.5.1\build\net8.0\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
-C:\Users\mahes\.nuget\packages\mstest.testadapter\3.5.1\build\net8.0\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
-C:\Users\mahes\.nuget\packages\mstest.testadapter\3.5.1\build\net8.0\Microsoft.TestPlatform.AdapterUtilities.dll

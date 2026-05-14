@@ -1,4 +1,0 @@
-﻿C:\chat application\src\Service\ChatService\ConnectHub.Chat.Application\Class1.cs
-C:\chat application\src\Service\ChatService\ConnectHub.Chat.Application\DTOs\MessageDto.cs
-C:\chat application\src\Service\ChatService\ConnectHub.Chat.Application\DTOs\SendMessageDTO.cs
-C:\chat application\src\Service\ChatService\ConnectHub.Chat.Application\Services\ChatService.cs
