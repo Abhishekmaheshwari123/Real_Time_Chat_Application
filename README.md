@@ -22,7 +22,7 @@ The network flow routes all client requests through a centralized API Gateway po
                                      REST |             | (SignalR)
                                           v             |
                       +-------------------------------------------------------+
-                      |                 YARP API Gateway                      |
+                      |                 Ocelot Gateway                      |
                       |        [Port 7000] (Reverse Proxy & CORS)             |
                       +-------------------------------------------------------+
                             |                  |                 |
