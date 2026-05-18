@@ -1,114 +1,352 @@
 # ConnectHub: System Design Document
 
-This document outlines the High-Level Design (HLD) and Low-Level Design (LLD) for the **ConnectHub Chat Application**, a modern, real-time messaging platform built using a microservices architecture.
+This document outlines the **High-Level Design (HLD)** and **Low-Level Design (LLD)** for the **ConnectHub Chat Application**, a production-grade, real-time messaging microservices system. It includes architecture diagrams, detailed feature flowcharts, database ER diagrams, and UML class diagrams.
 
 ---
 
-## 1. High-Level Design (HLD)
+# 1. High-Level Design (HLD)
 
-The High-Level Design provides a birds-eye view of the system's architecture, components, and how they interact. 
+The High-Level Design defines the system structure, responsibilities of each component, and the real-time communication patterns.
 
-### 1.1. System Architecture Pattern
-ConnectHub uses a **Microservices Architecture**. The system is decomposed into loosely coupled, highly cohesive, independently deployable backend services. The services communicate with the frontend via an API Gateway and rely on asynchronous message passing and real-time WebSockets (SignalR) where necessary.
-
-### 1.2. Core Components
-- **Frontend (Client Application):** 
-  - A responsive web application built with **React** (utilizing Context API for state management).
-  - Handles UI rendering, user interactions, routing, and real-time DOM updates.
-- **API Gateway:** 
-  - Acts as the single entry point for the frontend, routing requests to appropriate backend microservices.
-  - Implements cross-cutting concerns like reverse routing and potentially rate limiting.
-- **Microservices (Backend):** Built with **ASP.NET Core 8 Web API**.
-  - **AuthService:** Manages user registration, authentication (JWT), identity verification, and OAuth (Google).
-  - **ChatService:** Core business logic for handling conversations, 1-to-1 messaging, group chats, message persistence, and real-time delivery via **SignalR**.
-  - **MediaService:** Responsible for handling file uploads (images, videos, documents), generating thumbnails, and serving media. Integrates with **Azure Blob Storage**.
-  - **NotificationService:** Handles delivering push notifications, offline messages logic, and system alerts.
-- **Databases:** 
-  - Each microservice owns its database to ensure decoupling (Database-per-service pattern).
-  - Implemented using **SQL Server** via **Entity Framework Core**. (e.g., AuthDB, ChatDB, NotificationDb).
-- **Storage:** 
-  - **Azure Blob Storage** for persisting user-uploaded media and avatars.
-- **Infrastructure & Deployment:**
-  - Containerized using **Docker**.
-  - Orchestrated locally via **Docker Compose**.
-  - Configured with environment variables and `.env` files for seamless CI/CD to cloud platforms.
-
-### 1.3. Architecture Diagram (Mermaid)
-
-```mermaid
-graph TD
-    Client[React Frontend App] --> |HTTP / WebSockets| Gateway[API Gateway]
-    
-    Gateway --> |Route| AuthAPI[Auth Service]
-    Gateway --> |Route / SignalR| ChatAPI[Chat Service]
-    Gateway --> |Route| MediaAPI[Media Service]
-    Gateway --> |Route| NotifyAPI[Notification Service]
-
-    AuthAPI --> AuthDB[(Auth DB - SQL Server)]
-    ChatAPI --> ChatDB[(Chat DB - SQL Server)]
-    NotifyAPI --> NotifyDB[(Notification DB - SQL Server)]
-    
-    MediaAPI --> BlobStorage[(Azure Blob Storage)]
-    
-    %% Optional asynchronous bus for cross-service events %%
-    ChatAPI -.-> |Event/HTTP| NotifyAPI
-    ChatAPI -.-> |Event/HTTP| MediaAPI
+```
++-------------------------------------------------------------------+
+|                          React Frontend                           |
++-------------------------------------------------------------------+
+                                  | HTTP / WebSockets
+                                  v
++-------------------------------------------------------------------+
+|                        Ocelot API Gateway                         |
++-------------------------------------------------------------------+a
+         |                     |                     |
+         +-------------+       +-------------+       +-------------+
+         | (Auth API)  |       | (Chat API)  |       | (Media API) |
+         v             v             v             v             v
+   +-----------+ +-----------+ +-----------+ +-----------+ +-----------+
+   |  Auth     | |  Chat     | |  Media    | | Notification| | Gateway   |
+   |  Service  | |  Service  | |  Service  | |  Service    | |  Service  |
+   +-----------+ +-----------+ +-----------+ +-----------+ +-----------+
+         |             |             |             |
+         v             v             v             v
+    [(Auth DB)]   [(Chat DB)]  [Azure Blob]   [(Notify DB)]
 ```
 
-### 1.4. Key Flows
-- **Authentication:** User logs in via React App -> Request to API Gateway -> Routed to AuthService -> AuthService validates credentials against AuthDB -> Returns JWT -> Client stores JWT and uses it for subsequent requests.
-- **Real-Time Messaging:** Client establishes SignalR WebSocket connection with ChatService -> User sends a message -> ChatService persists it to ChatDB -> ChatService broadcasts the message to the recipient's active SignalR connection -> Recipient's UI updates instantly.
-- **Media Upload:** Client sends file to MediaService -> MediaService streams file to Azure Blob Storage -> Returns Media URI/Metadata -> Client attaches metadata to a Chat message -> Sends to ChatService.
+---
+
+## 1.1. Core Architectural Feature Flowcharts
+
+### A. Authentication & OAuth Flow Chart
+This flowchart describes the path for both Traditional (Email/Password) Login/Register and Google OAuth.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Client (React App)
+    participant Gateway as API Gateway
+    participant Auth as Auth Microservice
+    participant AuthDB as Auth Database
+    participant Google as Google Identity Server
+
+    alt Traditional Email/Password Login
+        User->>Gateway: POST /api/auth/login (Email, Password)
+        Gateway->>Auth: Forward Login Request
+        Auth->>AuthDB: Query User by Email
+        AuthDB-->>Auth: User Entity (PasswordHash)
+        Auth->>Auth: Verify BCrypt / Argon2 Password Hash
+        alt Credentials Invalid
+            Auth-->>User: 401 Unauthorized
+        else Credentials Valid
+            Auth->>Auth: Generate JWT Token (Claims: UserId, Email, Role)
+            Auth-->>User: 200 OK (JWT Token, User Profile)
+        end
+    else Google OAuth Login
+        User->>Google: Prompt Login Screen & Authenticate
+        Google-->>User: Return Google Authorization code/id_token
+        User->>Gateway: POST /api/auth/google-login (id_token)
+        Gateway->>Auth: Forward Google Login Request
+        Auth->>Google: Verify token with Google API Client
+        Google-->>Auth: Verified Google User Profile (Email, Name, GoogleId)
+        Auth->>AuthDB: Query User by Email/GoogleId
+        alt User Does Not Exist
+            Auth->>AuthDB: Create New User Record (Set Flag: IsOAuthUser)
+            AuthDB-->>Auth: Saved User Record
+        end
+        Auth->>Auth: Generate JWT Token (Claims: UserId, Email)
+        Auth-->>User: 200 OK (JWT Token, User Profile)
+    end
+```
 
 ---
 
-## 2. Low-Level Design (LLD)
+### B. Real-Time Chat & Seen Receipt Flow Chart
+This sequence diagram shows how clients establish a WebSocket connection and how a chat message and read receipt ("Seen" ticks) are processed in real-time.
 
-The Low-Level Design focuses on the internal structure of individual components, specific technologies, design patterns, and code-level architecture.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Alice as Client Alice (Sender)
+    actor Bob as Client Bob (Receiver)
+    participant Gateway as API Gateway
+    participant ChatHub as Chat SignalR Hub
+    participant ChatAPI as Chat Microservice
+    participant ChatDB as Chat Database
 
-### 2.1. Microservice Architecture (Clean Architecture Pattern)
-Each microservice (e.g., ChatService, MediaService, AuthService) is structured using **Clean Architecture** (or Onion Architecture) principles. This ensures that the core business logic (Domain) is independent of frameworks, UI, and external agencies.
+    %% SignalR Connection Establishment %%
+    Bob->>Gateway: Connect WebSocket /negotiate
+    Gateway->>ChatHub: Establish Connection
+    ChatHub->>ChatHub: Map Bob's ConnectionId to UserId (Bob)
+    Note over Bob, ChatHub: WebSocket Connection Active
 
-The standard folder structure for a service (e.g., `ConnectHub.Media`):
-1. **API Layer (`ConnectHub.Media.API`):** Contains Controllers, SignalR Hubs, Middleware, Dependency Injection setup, and `Program.cs`. Acts as the presentation mechanism.
-2. **Application Layer (`ConnectHub.Media.Application`):** Contains Use Cases, DTOs (Data Transfer Objects), Interfaces, and Application Services. Orchestrates business workflows.
-3. **Domain Layer (`ConnectHub.Media.Domain`):** Contains Enterprise Logic, Entities, Value Objects, and Domain Exceptions. Pure C# with no external dependencies.
-4. **Infrastructure Layer (`ConnectHub.Media.Infrastructure`):** Implementation of interfaces defined in Application/Domain layers. Contains Entity Framework Core `DbContext`, Repositories, Database Migrations, and Azure Blob Storage clients.
+    %% Send Message Flow %%
+    Alice->>Gateway: Send Message via WebSocket / HTTP
+    Gateway->>ChatHub: OnSendMessage(ReceiverId, Content)
+    ChatHub->>ChatAPI: Process & Validate Message
+    ChatAPI->>ChatDB: Insert Message (Status: Sent, Timestamp: Now)
+    ChatDB-->>ChatAPI: Saved Message (With Id)
+    
+    ChatHub->>Bob: Emit "ReceiveMessage" (Message DTO)
+    Bob-->>ChatHub: Acknowledge delivery
+    ChatHub->>ChatDB: Update Message Status (Status: Delivered)
+    ChatHub->>Alice: Emit "MessageStatusUpdated" (Id, Delivered)
 
-### 2.2. Database Design & ORM
-- **Entity Framework Core (Code-First):** Used for all data access. Migrations are managed locally and applied on application startup (or via CI/CD pipelines).
-- **Data Models (Examples):**
-  - *User Entity (Auth):* `Id`, `Email`, `PasswordHash`, `Name`, `ProfilePictureUrl`, `CreatedAt`.
-  - *Message Entity (Chat):* `Id`, `SenderId`, `ReceiverId`, `Content`, `Timestamp`, `Status` (Sent/Delivered/Read), `MediaUrl`.
-  - *Conversation Entity (Chat):* `Id`, `User1Id`, `User2Id`, `LastMessageId`, `UpdatedAt`.
+    %% Seen Receipt Flow %%
+    Note over Bob: Bob opens chat window with Alice
+    Bob->>Gateway: Send Seen Event (MessageId)
+    Gateway->>ChatHub: OnMessageSeen(MessageId, SenderId)
+    ChatHub->>ChatAPI: Mark message as read
+    ChatAPI->>ChatDB: Update Message Status (Status: Read/Seen)
+    ChatHub->>Alice: Emit "MessageSeen" (MessageId)
+    Note over Alice: Alice UI updates to show blue double ticks
+```
 
-### 2.3. Design Patterns Utilized
-- **Repository Pattern:** Used in the Infrastructure layer to abstract database interactions and facilitate unit testing.
-- **Dependency Injection (DI):** Heavily utilized throughout the ASP.NET Core stack to inject services, repositories, and configurations.
-- **DTO (Data Transfer Object) Pattern:** Used to pass data between the API layer and Application layer, preventing Domain entities from being exposed to the client.
-- **Factory Pattern:** Used for creating complex objects, like `DbContextFactory` for design-time migrations.
-- **Observer Pattern (via SignalR):** For real-time event broadcasting to connected web clients.
+---
 
-### 2.4. Real-Time Communication Details
-- **Technology:** ASP.NET Core SignalR.
-- **Hub (`ChatHub.cs`):** Manages connections, disconnections, and mapping connection IDs to specific User IDs.
-- **Features:** 
-  - Emitting "Typing..." indicators.
-  - Broadcasting new messages.
-  - Emitting read receipts ("Seen" blue ticks).
-  - Handling online/offline presence status.
+### C. Media Sharing & Persistent Upload Flow Chart
+This flow details how rich media (images, files, PDFs) are shared and distributed securely.
 
-### 2.5. Security Considerations
-- **JWT (JSON Web Tokens):** Used for stateless authentication. Passed in the `Authorization: Bearer <token>` header.
-- **CORS (Cross-Origin Resource Sharing):** Configured in API gateways/services to only allow the React frontend domain.
-- **Environment Variables & `.env`:** Secrets (DB connection strings, Azure Storage keys, JWT secrets) are explicitly excluded from version control and injected via `.env` files/Docker environments.
-- **Input Validation:** Enforced in the Application/API layer to prevent SQL injection and XSS.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Alice as Client Alice
+    actor Bob as Client Bob
+    participant Gateway as API Gateway
+    participant Media as Media Microservice
+    participant Blob as Azure Blob Storage
+    participant Chat as Chat Microservice
 
-### 2.6. Testing Strategy
-- **Unit Testing:** Implemented using **MSTest**. Targets the Application and Domain layers (business logic) by mocking Infrastructure components (like Repositories using Moq or in-memory DBs).
-- **Smoke/Integration Testing:** Validates that controllers map correctly and services successfully wire up DI containers.
+    Alice->>Gateway: POST /api/media/upload (File Binary)
+    Gateway->>Media: Forward Media Payload
+    Media->>Media: Validate File Type & Max Size
+    Media->>Blob: Upload File to Container
+    Blob-->>Media: Return Permanent Blob URL
+    Media->>Media: Generate Thumbnail (if image/video)
+    Media-->>Alice: 200 OK (Blob URL, Thumbnail URL, FileType)
+    
+    Note over Alice: Alice attaches Media Metadata to chat message payload
+    Alice->>Gateway: POST /api/chat/messages (Content: "", MediaUrl: BlobURL)
+    Gateway->>Chat: Process Chat Message with Media
+    Chat->>Chat: Save to ChatDB (MediaUrl referenced)
+    Chat->>Bob: Real-Time SignalR Broadcast (ReceiveMessage)
+    Note over Bob: Bob's client renders media viewer
+```
 
-### 2.7. Frontend (React) Internals
-- **Component Structure:** Function components using React Hooks (`useState`, `useEffect`, `useCallback`).
-- **State Management:** `ChatContext.jsx` manages the global state of active conversations, unread counts, and the SignalR connection instance.
-- **Network calls:** `axios` instances configured with interceptors to automatically append JWT tokens to outgoing requests.
+---
+
+### D. Offline Notifications System Flow Chart
+This flow describes the actions taken when the receiver is offline and requires standard notifications.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Alice as Client Alice
+    participant ChatHub as Chat SignalR Hub
+    participant ChatAPI as Chat Microservice
+    participant Notify as Notification Microservice
+    participant NotifyDB as Notification DB
+    actor Bob as Client Bob (Offline)
+
+    Alice->>ChatHub: Send Message to Bob
+    ChatHub->>ChatHub: Check Bob's active connections
+    Note over ChatHub: Bob is not connected (Offline)
+    ChatHub->>ChatAPI: Process message normally
+    ChatAPI->>Notify: Raise Event: MessageUndelivered (MessageId, ReceiverId, Content)
+    Notify->>NotifyDB: Save PushNotification Queue (Pending state)
+    
+    alt Push Notification Service Integration (e.g. Firebase)
+        Notify->>NotifyDB: Poll Pending Notifications
+        Notify->>Notify: Construct FCM Notification
+        Notify->>Bob: Push FCM Payload (Mobile/Web Service Worker)
+        Note over Bob: Mobile device receives Push Notification banner
+    end
+```
+
+---
+
+# 2. Low-Level Design (LLD)
+
+The Low-Level Design defines the implementation details, class layouts, schemas, and structural constraints.
+
+## 2.1. Structural UML Class Diagram (Clean Architecture Layering)
+ConnectHub implements a modular **Clean Architecture**. This UML diagram illustrates the logical separation and relationship between layers in our services (e.g., the Chat microservice).
+
+```mermaid
+classDiagram
+    %% Clean Architecture Layering %%
+    
+    %% Domain Layer (Center) %%
+    class EntityBase {
+        <<Abstract>>
+        +Guid Id
+        +DateTime CreatedAt
+    }
+    class Message {
+        +Guid SenderId
+        +Guid ReceiverId
+        +string Content
+        +string MediaUrl
+        +DateTime Timestamp
+        +MessageStatus Status
+    }
+    class Conversation {
+        +Guid User1Id
+        +Guid User2Id
+        +Guid LastMessageId
+        +DateTime UpdatedAt
+    }
+    EntityBase <|-- Message
+    EntityBase <|-- Conversation
+
+    %% Application Layer %%
+    class IChatRepository {
+        <<Interface>>
+        +GetMessagesAsync(Guid conversationId) Task~IEnumerable~Message~~
+        +SaveMessageAsync(Message msg) Task~bool~
+        +GetConversationAsync(Guid user1, Guid user2) Task~Conversation~
+    }
+    class ISignalRService {
+        <<Interface>>
+        +SendMessageToUserAsync(Guid userId, MessageDto message) Task
+        +SendSeenReceiptAsync(Guid senderId, Guid messageId) Task
+    }
+    class SendMessageCommandHandler {
+        +IChatRepository _chatRepo
+        +ISignalRService _signalRService
+        +Handle(SendMessageCommand cmd) Task~MessageDto~
+    }
+    SendMessageCommandHandler ..> IChatRepository : Uses
+    SendMessageCommandHandler ..> ISignalRService : Uses
+
+    %% Infrastructure Layer %%
+    class ChatDbContext {
+        +DbSet~Message~ Messages
+        +DbSet~Conversation~ Conversations
+        +OnModelCreating(ModelBuilder mb)
+    }
+    class ChatRepository {
+        +ChatDbContext _context
+        +GetMessagesAsync(Guid conversationId)
+    }
+    class SignalRService {
+        +IHubContext~ChatHub~ _hubContext
+    }
+    IChatRepository <|-- ChatRepository : Implements
+    ISignalRService <|-- SignalRService : Implements
+    ChatRepository --> ChatDbContext : Queries
+
+    %% API Presentation Layer %%
+    class ChatController {
+        +IMediator _mediator
+        +SendMessage(SendMessageRequest req) Task~IActionResult~
+    }
+    class ChatHub {
+        +SendMessage(string receiverId, string content) Task
+        +MarkAsRead(string messageId, string senderId) Task
+        +OnConnectedAsync() Task
+        +OnDisconnectedAsync(Exception ex) Task
+    }
+    ChatController --> SendMessageCommandHandler : Dispatches Command
+    ChatHub --> SendMessageCommandHandler : Directly Invokes / Dispatches
+```
+
+---
+
+## 2.2. Database Entity-Relationship (ER) Diagram
+Below is the ER Diagram mapping the primary relational databases. Since we leverage a Microservices pattern, the schemas reside across independent databases (`AuthDB` and `ChatDB`) but are related logically via global `UserId` keys.
+
+```mermaid
+erDiagram
+    %% AuthDB Schema %%
+    USERS ||--o{ USER_ROLES : has
+    USERS {
+        Guid Id PK
+        string Email UK
+        string PasswordHash
+        string DisplayName
+        string ProfilePictureUrl
+        string GoogleId NULL
+        DateTime CreatedAt
+    }
+    USER_ROLES {
+        Guid UserId FK
+        string RoleName
+    }
+
+    %% ChatDB Schema %%
+    CONVERSATIONS ||--o{ MESSAGES : contains
+    CONVERSATIONS {
+        Guid Id PK
+        Guid User1Id
+        Guid User2Id
+        Guid LastMessageId FK
+        DateTime UpdatedAt
+    }
+    MESSAGES {
+        Guid Id PK
+        Guid ConversationId FK
+        Guid SenderId
+        Guid ReceiverId
+        string Content
+        string MediaUrl NULL
+        DateTime Timestamp
+        string Status "Sent | Delivered | Read"
+    }
+
+    %% NotificationDB Schema %%
+    NOTIFICATIONS {
+        Guid Id PK
+        Guid RecipientId
+        string Title
+        string Body
+        bool IsRead
+        DateTime CreatedAt
+    }
+```
+
+---
+
+## 2.3. Design Patterns Applied
+
+### 1. CQRS (Command Query Responsibility Segregation)
+By segregating write operations (Commands) from read operations (Queries), performance, scalability, and security are optimized.
+- **Example Command:** `SendMessageCommand` -> Handled by changing DB state and publishing SignalR updates.
+- **Example Query:** `GetChatHistoryQuery` -> Bypasses heavy business rules to pull directly from read-optimized DbContext mappings.
+
+### 2. Dependency Injection & Repository Patterns
+- All external calls (database queries, network requests, Azure operations) are isolated behind interfaces (`IChatRepository`, `IBlobStorageService`).
+- ASP.NET DI handles standard service lifetimes (`Scoped` for repositories and contexts, `Singleton` for persistent helper utilities, `Transient` for transient request-level commands).
+
+### 3. Gateway Routing & Reverse Proxy (Ocelot)
+- ConnectHub Gateway exposes unified endpoints to the frontend, transforming external paths (e.g. `/api/v1/chat/messages`) internally to private addresses (e.g. `http://chat-api:8080/messages`) transparently.
+
+---
+
+## 2.4. Detailed Low-Level Component Responsibilities
+
+| Service | Primary Component Class | Method Name | Functionality |
+| :--- | :--- | :--- | :--- |
+| **Auth** | `AuthService` | `GenerateJwtToken(User user)` | Builds token with `Claims` (Id, Role, Name) signed using HS256 algorithm and configured environment secret. |
+| | `AuthService` | `RegisterUser(RegisterDto dto)` | Hashes raw password using BCrypt and saves user to Auth database. |
+| **Chat** | `ChatHub` | `OnConnectedAsync()` | Reads authenticating JWT claim from query parameter, maps `Context.ConnectionId` to User ID using internal thread-safe memory storage. |
+| | `ChatHub` | `SendMessage(string to, string msg)` | Broadcasts real-time events to dynamic Client connection IDs. |
+| | `ChatRepository` | `GetConversationMessages(Guid convId)` | Returns historical messages sorted sequentially in chronological order. |
+| **Media** | `BlobStorageService` | `UploadFileAsync(IFormFile file)` | Sanitizes file name, generates a unique GUID prefix, uploads stream directly to Azure Storage, and outputs a secure direct SAS URI. |
+| **Notification** | `PushService` | `QueueNotification(Guid userId)` | Saves notification payloads to local DB to retry offline dispatches reliably. |
