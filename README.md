@@ -10,7 +10,7 @@ ConnectHub is built using a highly scalable, decoupled microservices architectur
 
 ## 1.1. System Topology & Network Architecture
 
-The network flow routes all client requests through a centralized API Gateway powered by **YARP (Yet Another Reverse Proxy)**. The gateway handles Cross-Origin Resource Sharing (CORS) policies and routes traffic to isolated internal microservices running on dedicated private networks.
+The network flow routes all client requests through a centralized API Gateway powered by **Ocelot (Yet Another Reverse Proxy)**. The gateway handles Cross-Origin Resource Sharing (CORS) policies and routes traffic to isolated internal microservices running on dedicated private networks.
 
 ```
                                     +------------------------------+
@@ -64,7 +64,7 @@ The network flow routes all client requests through a centralized API Gateway po
 
 | Service | Primary Stack | Purpose & Core Responsibility |
 | :--- | :--- | :--- |
-| **Api Gateway** | ASP.NET Core & YARP | Exposes a single entry point (Port 7000) for the React frontend; manages CORS, rewrites paths, and proxies REST/WebSocket requests. |
+| **Api Gateway** | ASP.NET Core & Ocelot | Exposes a single entry point (Port 7000) for the React frontend; manages CORS, rewrites paths, and proxies REST/WebSocket requests. |
 | [Auth Service](file:///c:/chat%20application/src/Service/AuthService) | C#, .NET 8, EF Core | Handles user registration, password hashing (BCrypt), credentials validation, Google OAuth flow, and JWT token issuance. |
 | [Chat Service](file:///c:/chat%20application/src/Service/ChatService) | C#, .NET 8, SignalR, EF Core | Coordinates direct real-time message delivery, delivery/read statuses, active socket mappings, and chat history retrieval. |
 | [Media Service](file:///c:/chat%20application/src/Service/MediaService) | C#, .NET 8, Azure Blob SDK | Receives media uploads, validates file type limits, persists binaries securely in Azure Blob Storage, and generates expiring SAS URIs. |
@@ -81,7 +81,7 @@ This sequence diagram details the two paths for authentication: Traditional Emai
 sequenceDiagram
     autonumber
     actor Client as React Client
-    participant Gateway as YARP Gateway
+    participant Gateway as Ocelot Gateway
     participant Auth as Auth Microservice
     participant AuthDB as PostgreSQL (Auth)
     participant Google as Google Identity Provider
@@ -123,7 +123,7 @@ sequenceDiagram
     autonumber
     actor Alice as Client Alice (Sender)
     actor Bob as Client Bob (Receiver)
-    participant Gateway as YARP Gateway
+    participant Gateway as Ocelot Gateway
     participant ChatHub as Chat SignalR Hub
     participant ChatDB as PostgreSQL (Chat)
 
@@ -163,7 +163,7 @@ This diagram details the sequence for uploading files, documents, and pictures s
 sequenceDiagram
     autonumber
     actor Client as React Client
-    participant Gateway as YARP Gateway
+    participant Gateway as Ocelot Gateway
     participant Media as Media Microservice
     participant Blob as Azure Blob Storage
     participant Chat as Chat Microservice
@@ -191,7 +191,7 @@ sequenceDiagram
     autonumber
     actor Alice as Client Alice
     participant Chat as Chat Service
-    participant Gateway as YARP Gateway
+    participant Gateway as Ocelot Gateway
     participant Notify as Notification Service
     participant NotifyDB as PostgreSQL (Notify)
     actor Bob as Client Bob (Active/Offline)
@@ -383,7 +383,7 @@ public class CustomUserIdProvider : IUserIdProvider
 
 | Pattern | Architectural Component | Low-Level Implementation & Rationale |
 | :--- | :--- | :--- |
-| **Gateway Routing / Reverse Proxy** | YARP Gateway | Decouples frontend requests from microservice locations. The Gateway proxies paths (e.g. `/api/chat/*` to private Service URLs) dynamically. |
+| **Gateway Routing / Reverse Proxy** | Ocelot Gateway | Decouples frontend requests from microservice locations. The Gateway proxies paths (e.g. `/api/chat/*` to private Service URLs) dynamically. |
 | **Dependency Inversion** | Clean Architecture Layers | High-level application logic depends on abstractions (e.g., `IBlobStorageService`), which are implemented by lower-level infrastructure classes (`BlobStorageService`). |
 | **Observer (Publish-Subscribe)** | SignalR Hubs | ConnectHub's core real-time capability. Senders publish events to ChatHub, which dynamically acts as a message broker to broadcast events to subscribed client channels. |
 | **Strategy Pattern** | `IUserIdProvider` | Standardizes user session resolution. The runtime switches between custom socket mapping strategies (`EmailBasedUserIdProvider` vs. `CustomUserIdProvider`) seamlessly. |
