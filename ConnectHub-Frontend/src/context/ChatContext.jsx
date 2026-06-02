@@ -53,6 +53,11 @@ export const ChatProvider = ({ children }) => {
     // 1. Initialize Connection
     useEffect(() => {
         if (token) {
+            console.debug("SignalR: creating connection — token present:", !!token);
+            try {
+                // quick non-sensitive preview for debugging (first 10 chars)
+                console.debug("SignalR: tokenPreview:", token ? `${token.slice(0, 10)}...` : null);
+            } catch {}
             const newConnection = new signalR.HubConnectionBuilder()
                 .withUrl(`${API_GATEWAY_URL}/chatHub`, { accessTokenFactory: () => token })
                 .withAutomaticReconnect()
@@ -72,7 +77,19 @@ export const ChatProvider = ({ children }) => {
                     fetchConversations();
                     fetchUnread();
                 })
-                .catch(err => console.error("SignalR Connection Error: ", err));
+                .catch(err => {
+                    console.error("SignalR Connection Error: ", err);
+                    try {
+                        // provide a clearer console hint if negotiation fails with 401
+                        if (err && err.toString && err.toString().includes('401')) {
+                            console.warn('SignalR negotiation returned 401. Check that the client token is present and that the gateway forwards the token (query or header) to the Chat API.');
+                        }
+                    } catch {}
+                });
+
+            connection.onclose((error) => {
+                console.warn('SignalR connection closed', error);
+            });
 
             connection.on("ReceiveMessage", (data) => {
                 const sender = (data.sender || data.Sender).toLowerCase();

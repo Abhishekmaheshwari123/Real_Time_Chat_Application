@@ -50,7 +50,7 @@ const Login = () => {
             }
         } catch (err) {
             console.error(err);
-            alert("Google login error");
+            alert("Authentication Service is Sleeping");
         }
     };
 
