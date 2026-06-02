@@ -50,7 +50,7 @@ const Login = () => {
             }
         } catch (err) {
             console.error(err);
-            alert("Authentication Service is Sleeping");
+            alert("Auth Service is Sleeping");
         }
     };
 
